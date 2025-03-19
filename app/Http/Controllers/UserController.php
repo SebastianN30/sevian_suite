@@ -14,4 +14,9 @@ class UserController extends Controller
             'users' => $users
         ]);
     }
+
+    public function create(Request $request){
+        return Inertia::render('User/New', [
+        ]);
+    }
 }

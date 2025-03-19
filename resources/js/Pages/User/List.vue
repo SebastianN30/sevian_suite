@@ -5,6 +5,12 @@
             <h2 class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">
                 Usuarios
             </h2>
+            <div>
+                <Link :href="route('user.create')"
+                    class="mt-4 inline-block bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded transition-colors duration-200">
+                    Crear usuario
+                </Link>
+            </div>
             <div class="py-12">
                 <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6 border border-gray-200 dark:border-gray-700 rounded-lg">
                     <div class="bg-white dark:bg-gray-800 shadow sm:rounded-lg p-4">
@@ -29,9 +35,9 @@
                                     </td>
                                 </tr>
                                 <tr v-for="user in users" :key="user.id" class="border-b border-gray-200 dark:border-gray-700">
-                                    <td class="px-4 py-2 whitespace-no-wrap text-gray-700 dark:text-gray-300">{{ user.name }}</td>
-                                    <td class="px-4 py-2 whitespace-no-wrap text-gray-700 dark:text-gray-300">{{ user.email }}</td>
-                                    <td class="px-4 py-2 whitespace-no-wrap">
+                                    <td class="px-4 py-2 whitespace-no-wrap text-gray-700 dark:text-gray-300 border-x border-gray-200 dark:border-gray-700">{{ user.name }}</td>
+                                    <td class="px-4 py-2 whitespace-no-wrap text-gray-700 dark:text-gray-300 border-x border-gray-200 dark:border-gray-700">{{ user.email }}</td>
+                                    <td class="px-4 py-2 whitespace-no-wrap text-gray-700 dark:text-gray-300 border-x border-gray-200 dark:border-gray-700">
                                         <Link :href="route('user.edit', user.id)"
                                             class="mt-4 inline-block bg-yellow-500 hover:bg-yellow-600 text-white py-2 px-4 rounded transition-colors duration-200">
                                         Editar usuario</Link>
@@ -52,5 +58,5 @@ import { Head, Link, router } from '@inertiajs/vue3';
 const props = defineProps({
     users: Object
 });
-console.log(props.users);
+/* console.log(props.users); */
 </script>
