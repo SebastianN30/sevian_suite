@@ -18,7 +18,7 @@
                             <div class="mb-4">
                                 <label for="email" class="block text-sm font-medium text-white ">Email</label>
                                 <input v-model="form.email" type="email" id="email" 
-                                    name="email" class="mt-1 p-2 border rounded-md w-full" placeholder="Apellido" required>
+                                    name="email" class="mt-1 p-2 border rounded-md w-full" placeholder="Email" required>
                             </div>
                             <div class="mb-4">
                                 <label for="password" class="block text-sm font-medium text-white ">Contraseña</label>
