@@ -34,17 +34,27 @@
                                         No hay información disponible
                                     </td>
                                 </tr>
-                                <tr v-for="user in users" :key="user.id" class="border-b border-gray-200 dark:border-gray-700">
+                                <tr v-for="user in users.data" :key="user.id" class="border-b border-gray-200 dark:border-gray-700">
                                     <td class="px-4 py-2 whitespace-no-wrap text-gray-700 dark:text-gray-300 border-x border-gray-200 dark:border-gray-700">{{ user.name }}</td>
                                     <td class="px-4 py-2 whitespace-no-wrap text-gray-700 dark:text-gray-300 border-x border-gray-200 dark:border-gray-700">{{ user.email }}</td>
                                     <td class="px-4 py-2 whitespace-no-wrap text-gray-700 dark:text-gray-300 border-x border-gray-200 dark:border-gray-700">
-                                        <Link :href="route('user.edit', user.id)"
-                                            class="mt-4 inline-block bg-yellow-500 hover:bg-yellow-600 text-white py-2 px-4 rounded transition-colors duration-200">
-                                        Editar usuario</Link>
+                                        <div class="flex justify-center items-center space-x-4">
+                                            <Link :href="route('user.edit', user.id)"
+                                                class="mt-4 inline-block bg-yellow-600 hover:bg-yellow-500 text-white py-2 px-4 rounded transition-colors duration-200">
+                                            Editar usuario</Link>
+                                            <Link :href="route('user.delete', user.id)"
+                                                method="delete"
+                                                class="mt-4 inline-block bg-red-600 hover:bg-red-500 text-white py-2 px-4 rounded transition-colors duration-200"
+                                                >
+                                            Eliminar usuario</Link>
+                                        </div>
                                     </td>
                                 </tr>
                             </tbody>
                         </table>
+                        <div class="flex justify-center w-full mt-4">
+                            <Paginator :links="users.links" />
+                        </div>
                     </div>
                 </div>
             </div>
@@ -53,10 +63,14 @@
 </template>
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import Paginator from '@/Pages/Pagination/Paginator.vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 
 const props = defineProps({
-    users: Object
+    users: {
+        type: Object,
+        required: true
+    }
 });
-/* console.log(props.users); */
+
 </script>
