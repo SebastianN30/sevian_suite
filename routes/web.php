@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\StockController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -30,6 +31,8 @@ Route::middleware('auth')->group(function () {
     Route::get('user/edit/{id}', [UserController::class, 'edit'])->name('user.edit');
     Route::post('user/update', [UserController::class, 'update'])->name('user.update');
     Route::delete('user/delete/{id}', [UserController::class, 'delete'])->name('user.delete');
+
+    Route::get('stock', [StockController::class, 'index'])->name('stock.index');
 });
 
 require __DIR__.'/auth.php';
