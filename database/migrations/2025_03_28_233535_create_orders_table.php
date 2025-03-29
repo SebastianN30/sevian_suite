@@ -11,17 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('products', function (Blueprint $table) {
+        Schema::create('orders', function (Blueprint $table) {
             $table->id();
-            $table->string('image')->nullable();
-            $table->string('name')->nullable();
-            $table->integer('stock')->nullable();
-            $table->integer('internal_price')->nullable();
-            $table->integer('profit_percentage')->nullable();
-            $table->integer('sale_price')->nullable();
+            $table->foreignId('client_id')->constrained()->onDelete('cascade');
             $table->string('status')->nullable();
+            $table->integer('total')->nullable();
             $table->timestamps();
         });
+        
     }
 
     /**
@@ -29,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('products');
+        Schema::dropIfExists('orders');
     }
 };
