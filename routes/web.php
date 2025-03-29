@@ -1,8 +1,9 @@
 <?php
 
-use App\Http\Controllers\CustomerController;
-use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProductsController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ClientController;
+use App\Http\Controllers\OrderController;
 use App\Http\Controllers\UserController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -38,10 +39,15 @@ Route::middleware('auth')->group(function () {
     Route::get('products/edit', [ProductsController::class, 'edit'])->name('product.edit');
     Route::get('products/delete', [ProductsController::class, 'delete'])->name('product.delete');
 
-    Route::get('customers', [CustomerController::class, 'index'])->name('customer.index');
-    Route::get('customers/create', [CustomerController::class, 'create'])->name('customer.create');
-    Route::get('customers/edit', [CustomerController::class, 'edit'])->name('customer.edit');
-    Route::get('customers/delete', [CustomerController::class, 'create'])->name('customer.delete');
+    Route::get('clients', [ClientController::class, 'index'])->name('client.index');
+    Route::get('clients/create', [ClientController::class, 'create'])->name('client.create');
+    Route::get('clients/edit', [ClientController::class, 'edit'])->name('client.edit');
+    Route::get('clients/delete', [ClientController::class, 'create'])->name('client.delete');
+
+    Route::get('order', [OrderController::class, 'index'])->name('order.index');
+    Route::get('order/create', [OrderController::class, 'create'])->name('order.create');
+    Route::get('order/edit', [OrderController::class, 'edit'])->name('order.edit');
+    Route::get('order/delete', [OrderController::class, 'create'])->name('order.delete');
 });
 
 require __DIR__.'/auth.php';

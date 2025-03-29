@@ -3,18 +3,21 @@
 namespace App\Http\Controllers;
 
 use Inertia\Inertia;
-use App\Models\Customer;
+use App\Models\Client;
 use Illuminate\Http\Request;
 
-class CustomerController extends Controller
+class ClientController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        return Inertia::render('Customer/List', [
-
+        $clients = Client::query()
+            ->latest()
+            ->paginate(8);
+        return Inertia::render('Client/List', [
+            'clients' => $clients
         ]);
     }
 
@@ -23,7 +26,7 @@ class CustomerController extends Controller
      */
     public function create()
     {
-        return Inertia::render('Customer/New', [
+        return Inertia::render('Client/New', [
 
         ]);
     }
@@ -39,7 +42,7 @@ class CustomerController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Customer $customer)
+    public function show(Client $client)
     {
         //
     }
@@ -47,9 +50,9 @@ class CustomerController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Customer $customer)
+    public function edit(Client $client)
     {
-        return Inertia::render('Customer/Edit', [
+        return Inertia::render('Client/Edit', [
 
         ]);
     }
@@ -57,7 +60,7 @@ class CustomerController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Customer $customer)
+    public function update(Request $request, client $client)
     {
         //
     }
@@ -65,7 +68,7 @@ class CustomerController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Customer $customer)
+    public function destroy(Client $client)
     {
         //
     }
