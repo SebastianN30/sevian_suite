@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Inertia\Inertia;
 use App\Models\Products;
 use Illuminate\Http\Request;
 
@@ -10,9 +11,10 @@ class ProductsController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
-    {
-        //
+    public function index(Request $request){
+        return Inertia::render('Products/List', [
+            
+        ]);
     }
 
     /**
@@ -20,7 +22,9 @@ class ProductsController extends Controller
      */
     public function create()
     {
-        //
+        return Inertia::render('Products/New', [
+
+        ]);
     }
 
     /**
@@ -44,7 +48,9 @@ class ProductsController extends Controller
      */
     public function edit(Products $products)
     {
-        //
+        return Inertia::render('Products/Edit', [
+
+        ]);
     }
 
     /**

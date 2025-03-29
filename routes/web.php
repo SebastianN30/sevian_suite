@@ -1,8 +1,9 @@
 <?php
 
+use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ProductsController;
 use App\Http\Controllers\UserController;
-use App\Http\Controllers\StockController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -32,7 +33,15 @@ Route::middleware('auth')->group(function () {
     Route::post('user/update', [UserController::class, 'update'])->name('user.update');
     Route::delete('user/delete/{id}', [UserController::class, 'delete'])->name('user.delete');
 
-    Route::get('stock', [StockController::class, 'index'])->name('stock.index');
+    Route::get('products', [ProductsController::class, 'index'])->name('product.index');
+    Route::get('products/new', [ProductsController::class, 'create'])->name('product.create');
+    Route::get('products/edit', [ProductsController::class, 'edit'])->name('product.edit');
+    Route::get('products/delete', [ProductsController::class, 'delete'])->name('product.delete');
+
+    Route::get('customers', [CustomerController::class, 'index'])->name('customer.index');
+    Route::get('customers/create', [CustomerController::class, 'create'])->name('customer.create');
+    Route::get('customers/edit', [CustomerController::class, 'edit'])->name('customer.edit');
+    Route::get('customers/delete', [CustomerController::class, 'create'])->name('customer.delete');
 });
 
 require __DIR__.'/auth.php';
