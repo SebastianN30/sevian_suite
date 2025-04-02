@@ -55,6 +55,6 @@ import { Head, Link, router } from '@inertiajs/vue3';
 import { ref } from 'vue';
 
 function back(){
-    router.visit(route('customer.index'));
+    router.visit(route('client.index'));
 }
 </script>
