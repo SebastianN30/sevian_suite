@@ -82,6 +82,7 @@ return [
         'string'  => 'El campo :attribute no debe contener más de :max caracteres.',
         'array'   => 'El campo :attribute no debe contener más de :max elementos.',
     ],
+    'max_digits' => 'El campo :attribute no debe tener más de :max dígitos.',
     'mimes'                => 'El campo :attribute debe ser un archivo de tipo: :values.',
     'mimetypes'            => 'El campo :attribute debe ser un archivo de tipo: :values.',
     'min'                  => [

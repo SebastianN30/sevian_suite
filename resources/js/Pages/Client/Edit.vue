@@ -4,12 +4,22 @@
     <AuthenticatedLayout>
         <template #header>
             <h2 class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">
-                {{ client.name + ' ' + client.lastname }}
+                Editar {{ client.name + ' ' + client.lastname }}
             </h2>
         </template>
-        <div v-if="$page.props.errors && Object.keys($page.props.errors).length > 0"
-            class="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
-            <ul class="list-disc list-inside">
+
+        <div v-if="showErrors"
+            class="mb-4 p-4 border rounded-lg bg-red-100 border-red-400 text-red-700 dark:bg-red-900 dark:border-red-700 dark:text-red-300 transition-colors duration-300">
+
+            <div class="flex justify-between items-center">
+                <h3 class="font-bold text-lg">Errores encontrados</h3>
+                <button @click="clearErrors"
+                    class="ml-2 text-4xl font-bold rounded-full p-2 hover:bg-red-200 dark:hover:bg-red-700 transition">
+                    &times;
+                </button>
+            </div>
+
+            <ul class="list-disc list-inside mt-2 space-y-1">
                 <li v-for="(error, key) in $page.props.errors" :key="key">
                     {{ error }}
                 </li>
@@ -74,12 +84,14 @@
 
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head, Link, router, useForm } from '@inertiajs/vue3';
+import { Head, Link, router, useForm, usePage } from '@inertiajs/vue3';
+import { ref, computed, watch } from 'vue';
 
 const props = defineProps({
     'client': Object
 });
 
+const page = usePage();
 const form = useForm({
     id: props.client.id || '',
     name: props.client.name || '',
@@ -89,8 +101,24 @@ const form = useForm({
     address: props.client.address || ''
 });
 
+const errors = computed(() => page.props.value?.errors ?? {});
+const showErrors = ref(false);
+
+watch(errors, (newErrors) => {
+    showErrors.value = Object.keys(newErrors).length > 0;
+});
+
+function clearErrors() {
+    showErrors.value = false;
+    form.clearErrors();
+}
+
 function submit() {
-    form.post(route('client.update'));
+    form.post(route('client.update'), {
+        onError: () => {
+            showErrors.value = true;
+        }
+    });
 }
 
 
