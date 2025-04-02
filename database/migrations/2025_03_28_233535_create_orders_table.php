@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('client_id')->constrained()->onDelete('cascade');
             $table->string('status')->nullable();
+            $table->integer('internal_total')->nullable();
             $table->integer('total')->nullable();
             $table->timestamps();
         });

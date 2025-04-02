@@ -10,7 +10,7 @@ class Product extends Model
     use HasFactory;
 
     const STATUS_ACTIVE = '1';
-    const STATUS_INACTIVE = '2';
+    const STATUS_INACTIVE = '0';
 
     protected $fillable = [
         'image',
@@ -24,6 +24,6 @@ class Product extends Model
 
     public function orders()
     {
-        return $this->belongsToMany(Order::class, 'order_product')->withPivot('quantity', 'price', 'subtotal')->withTimestamps();
+        return $this->belongsToMany(Order::class, 'order_product')->withPivot('quantity', 'price', 'subtotal', 'internal_price', 'internal_subtotal')->withTimestamps();
     }
 }

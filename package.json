@@ -20,6 +20,8 @@
         "vue": "^3.4.0"
     },
     "dependencies": {
+        "chart.js": "^4.4.8",
+        "lucide-vue-next": "^0.486.0",
         "sweetalert2": "^11.17.2"
     }
 }

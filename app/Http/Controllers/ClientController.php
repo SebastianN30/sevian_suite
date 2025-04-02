@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Inertia\Inertia;
 use App\Models\Client;
+use App\Models\Order;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
@@ -75,7 +76,54 @@ class ClientController extends Controller
      */
     public function show(Client $client)
     {
-        //
+        $client->load(['orders' => function ($query) {
+            $query->with(['products' => function ($query) {
+                $query->select('products.id', 'products.name')
+                    ->withPivot('quantity', 'price', 'internal_price');
+            }]);
+        }]);
+
+        $completedOrders = $client->orders->filter(fn($order) => $order->status === Order::STATUS_COMPLETED);
+
+        $topProducts = $completedOrders
+            ->flatMap(fn($order) => $order->products->map(fn($product) => [
+                'name' => $product->name,
+                'quantity' => $product->pivot->quantity,
+                'total_spent' => $product->pivot->quantity * $product->pivot->price,
+                'total_internal' => $product->pivot->quantity * $product->pivot->internal_price,
+                'profit' => ($product->pivot->price - $product->pivot->internal_price) * $product->pivot->quantity,
+            ]))
+            ->groupBy('name')
+            ->map(fn($products, $name) => [
+                'name' => $name,
+                'total_quantity' => $products->sum('quantity'),
+                'total_spent' => $products->sum('total_spent'),
+                'total_internal' => $products->sum('total_internal'),
+                'total_profit' => $products->sum('profit'),
+            ])
+            ->sortByDesc('total_quantity')
+            ->take(5)
+            ->values()
+            ->all();
+
+        $completedOrders = $client->orders->filter(fn($order) => $order->status === Order::STATUS_COMPLETED);
+
+        $totalProfit = $completedOrders->sum(fn($order) => $order->products->sum(
+            fn($product) => ($product->pivot->price - $product->pivot->internal_price) * $product->pivot->quantity
+        ));
+
+        $totalProductsSold = $completedOrders->sum(fn($order) => $order->products->sum(
+            fn($product) => $product->pivot->quantity
+        ));
+
+        $averageProfit = round($totalProductsSold > 0 ? $totalProfit / $totalProductsSold : 0);
+
+        return Inertia::render('Client/Detail', [
+            'client' => $client,
+            'topProducts' => $topProducts,
+            'totalProfit' => $totalProfit,
+            'averageProfit' => $averageProfit
+        ]);
     }
 
     /**

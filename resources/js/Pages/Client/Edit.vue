@@ -28,40 +28,46 @@
 
         <div class="py-8">
             <div class="max-w-2xl mx-auto sm:px-6 lg:px-8 space-y-6">
-                <div class="p-6 bg-gray-800 border border-gray-700 shadow sm:rounded-lg">
+                <div
+                    class="p-6 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 shadow sm:rounded-lg">
                     <form @submit.prevent="submit">
                         <div class="mb-4">
-                            <label for="name" class="block text-sm font-medium text-white mb-1">Nombre</label>
+                            <label for="name"
+                                class="block text-sm font-medium text-gray-800 dark:text-white mb-1">Nombre</label>
                             <input v-model="form.name" type="text" id="name" name="name"
-                                class="w-full p-4 rounded-lg border border-gray-600 bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition duration-200"
+                                class="w-full p-4 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition duration-200"
                                 placeholder="Nombre" required>
                         </div>
 
                         <div class="mb-4">
-                            <label for="lastname" class="block text-sm font-medium text-white mb-1">Apellido</label>
+                            <label for="lastname"
+                                class="block text-sm font-medium text-gray-800 dark:text-white mb-1">Apellido</label>
                             <input v-model="form.lastname" type="text" id="lastname" name="lastname"
-                                class="w-full p-4 rounded-lg border border-gray-600 bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition duration-200"
+                                class="w-full p-4 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition duration-200"
                                 placeholder="Apellido" required>
                         </div>
 
                         <div class="mb-4">
-                            <label for="phone_number" class="block text-sm font-medium text-white mb-1">Teléfono</label>
+                            <label for="phone_number"
+                                class="block text-sm font-medium text-gray-800 dark:text-white mb-1">Teléfono</label>
                             <input v-model="form.phone_number" type="text" id="phone_number" name="phone_number"
-                                class="w-full p-4 rounded-lg border border-gray-600 bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition duration-200"
+                                class="w-full p-4 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition duration-200"
                                 placeholder="Teléfono" required>
                         </div>
 
                         <div class="mb-4">
-                            <label for="email" class="block text-sm font-medium text-white mb-1">Correo</label>
+                            <label for="email"
+                                class="block text-sm font-medium text-gray-800 dark:text-white mb-1">Correo</label>
                             <input v-model="form.email" type="email" id="email" name="email"
-                                class="w-full p-4 rounded-lg border border-gray-600 bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition duration-200"
+                                class="w-full p-4 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition duration-200"
                                 placeholder="Correo" required>
                         </div>
 
                         <div class="mb-4">
-                            <label for="address" class="block text-sm font-medium text-white mb-1">Dirección</label>
+                            <label for="address"
+                                class="block text-sm font-medium text-gray-800 dark:text-white mb-1">Dirección</label>
                             <textarea v-model="form.address" id="address" name="address"
-                                class="w-full p-4 rounded-lg border border-gray-600 bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition duration-200"
+                                class="w-full p-4 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition duration-200"
                                 placeholder="Dirección" rows="4"></textarea>
                         </div>
 
@@ -120,7 +126,6 @@ function submit() {
         }
     });
 }
-
 
 function back() {
     router.visit(route('client.index'));
