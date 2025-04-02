@@ -34,14 +34,14 @@ class DatabaseSeeder extends Seeder
         $products = Product::factory()->state(['status' => Product::STATUS_ACTIVE])->count(300)->create();
         echo "---CREANDO ORDENES---\n";
         foreach ($clients as $client) {
-            foreach ([Order::STATUS_COMPLETED, Order::STATUS_CANCELLED, Order::STATUS_PENDING] as $status) {
+            foreach ([Order::STATUS_COMPLETED, Order::STATUS_CANCELLED, Order::STATUS_PENDING, Order::STATUS_CREATED] as $status) {
                 $order = Order::create([
                     'client_id' => $client->id,
                     'status' => $status
                 ]);
 
                 $selectedProducts = $products->random(rand(1, 10));
-                $totalOrder = 0;
+                $totalOrder = $internalTotalOrder = 0;
 
                 foreach ($selectedProducts as $product) {
                     $quantity = rand(1, 5);
@@ -51,13 +51,16 @@ class DatabaseSeeder extends Seeder
                     $order->products()->attach($product->id, [
                         'quantity' => $quantity,
                         'price' => $price,
-                        'subtotal' => $subtotal
+                        'subtotal' => $subtotal,
+                        'internal_price' => $product->internal_price,
+                        'internal_subtotal' => $product->internal_price * $quantity
                     ]);
 
                     $totalOrder += $subtotal;
+                    $internalTotalOrder += $product->internal_price * $quantity;
                 }
 
-                $order->update(['total' => $totalOrder]);
+                $order->update(['total' => $totalOrder, 'internal_total' => $internalTotalOrder]);
             }
         }
 
