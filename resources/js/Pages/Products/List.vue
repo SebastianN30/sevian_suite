@@ -38,17 +38,29 @@
                                 </tr>
                             </thead>
                             <tbody class="bg-white dark:bg-gray-800">
-                                <!-- <tr v-if="!users">
+                                <tr v-if="!products.data">
                                     <td class="px-6 py-4 whitespace-no-wrap text-center text-gray-700 dark:text-gray-300" colspan="3">
                                         No hay información disponible
                                     </td>
-                                </tr> -->
-                                <tr class="border-b border-gray-200 dark:border-gray-700">
-                                    <td class="px-4 py-2 whitespace-no-wrap text-gray-700 dark:text-gray-300 border-x border-gray-200 dark:border-gray-700"></td>
-                                    <td class="px-4 py-2 whitespace-no-wrap text-gray-700 dark:text-gray-300 border-x border-gray-200 dark:border-gray-700"></td>
-                                    <td class="px-4 py-2 whitespace-no-wrap text-gray-700 dark:text-gray-300 border-x border-gray-200 dark:border-gray-700"></td>
-                                    <td class="px-4 py-2 whitespace-no-wrap text-gray-700 dark:text-gray-300 border-x border-gray-200 dark:border-gray-700"></td>
-                                    <td class="px-4 py-2 whitespace-no-wrap text-gray-700 dark:text-gray-300 border-x border-gray-200 dark:border-gray-700"></td>
+                                </tr>
+                                <tr class="border-b border-gray-200 dark:border-gray-700" v-for="product in products.data" :key="product.id">
+                                    <td class="px-4 py-2 whitespace-no-wrap text-gray-700 dark:text-gray-300 border-x border-gray-200 dark:border-gray-700">
+                                        <img :src="product.image" 
+                                        :alt="product.name"
+                                        class="w-20 h-20 object-cover rounded">
+                                    </td>
+                                    <td class="px-4 py-2 whitespace-no-wrap text-gray-700 dark:text-gray-300 border-x border-gray-200 dark:border-gray-700">
+                                        {{ product.name }}
+                                    </td>
+                                    <td class="px-4 py-2 whitespace-no-wrap text-gray-700 dark:text-gray-300 border-x border-gray-200 dark:border-gray-700">
+                                        {{ product.internal_price }}
+                                    </td>
+                                    <td class="px-4 py-2 whitespace-no-wrap text-gray-700 dark:text-gray-300 border-x border-gray-200 dark:border-gray-700">
+                                        {{ product.sale_price }}
+                                    </td>
+                                    <td class="px-4 py-2 whitespace-no-wrap text-gray-700 dark:text-gray-300 border-x border-gray-200 dark:border-gray-700">
+                                        {{ product.stock }}
+                                    </td>
                                     <td class="px-4 py-2 whitespace-no-wrap text-gray-700 dark:text-gray-300 border-x border-gray-200 dark:border-gray-700">
                                         <div class="flex justify-center items-center space-x-4">
                                             <Link :href="route('product.edit')"
@@ -64,6 +76,9 @@
                                 </tr>
                             </tbody>
                         </table>
+                        <div class="flex justify-center w-full mt-4">
+                            <Paginator :links="products.links" />
+                        </div>
                     </div>
                 </div>
             </div>
@@ -74,4 +89,8 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import Paginator from '@/Pages/Pagination/Paginator.vue';
 import { Head, Link, router } from '@inertiajs/vue3';
+
+const props = defineProps({
+    'products': Object
+});
 </script>

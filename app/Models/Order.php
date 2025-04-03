@@ -11,12 +11,14 @@ class Order extends Model
 
     const STATUS_COMPLETED = 'completada';
     const STATUS_PENDING = 'pendiente';
+    const STATUS_CREATED = 'creada';
     const STATUS_CANCELLED = 'cancelada';
 
     protected $fillable = [
         'client_id',
         'status',
-        'total'
+        'total',
+        'internal_total'
     ];
 
     public function client()
@@ -26,6 +28,6 @@ class Order extends Model
 
     public function products()
     {
-        return $this->belongsToMany(Product::class, 'order_product')->withPivot('quantity', 'price', 'subtotal')->withTimestamps();
+        return $this->belongsToMany(Product::class, 'order_product')->withPivot('quantity', 'price', 'subtotal', 'internal_price', 'internal_subtotal')->withTimestamps();
     }
 }

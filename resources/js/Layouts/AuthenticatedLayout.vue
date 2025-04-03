@@ -52,10 +52,16 @@ const showingNavigationDropdown = ref(false);
                                     Productos
                                 </NavLink>
                                 <NavLink
-                                    :href="route('customer.index')"
-                                    :active="route().current('customer.index')"
+                                    :href="route('client.index')"
+                                    :active="route().current('client.index')"
                                 >
                                     Clientes
+                                </NavLink>
+                                <NavLink
+                                    :href="route('order.index')"
+                                    :active="route().current('order.index')"
+                                >
+                                    Ordenes
                                 </NavLink>
                             </div>
                         </div>

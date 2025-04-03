@@ -16,10 +16,14 @@ class ClientFactory extends Factory
      */
     public function definition(): array
     {
+        $name = fake()->firstName;
+        $lastname = fake()->lastName;
+        $email = strtolower("{$name}.{$lastname}") . '@example.com';
+
         return [
-            'name' => fake()->firstName,
-            'lastname' => fake()->lastName,
-            'email' => fake()->unique()->safeEmail,
+            'name' => $name,
+            'lastname' => $lastname,
+            'email' => $email,
             'phone_number' => fake()->phoneNumber,
             'address' => fake()->address
         ];
