@@ -4,11 +4,13 @@ namespace App\Http\Controllers;
 
 use Inertia\Inertia;
 use App\Models\Order;
+use App\Models\Product;
 use Illuminate\Http\Request;
 
 class OrderController extends Controller
 {
-    public function index(Request $request){
+    public function index(Request $request)
+    {
         $orders = Order::query()
             ->with('products')
             ->latest()
@@ -18,15 +20,14 @@ class OrderController extends Controller
         ]);
     }
 
-    public function create(){
-        return Inertia::render('Orders/New', [
-
-        ]);
-    }
-
-    public function edit(){
+    public function edit(Order $order)
+    {
+        $order->load('products', 'client');
+        $products = Product::where('status', Product::STATUS_ACTIVE)->get();
         return Inertia::render('Orders/Edit', [
-
+            'order' => $order,
+            'client' => $order->client,
+            'products' => $products
         ]);
     }
 }

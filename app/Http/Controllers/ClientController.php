@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Inertia\Inertia;
 use App\Models\Client;
 use App\Models\Order;
+use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
@@ -177,5 +178,68 @@ class ClientController extends Controller
     {
         Client::destroy($id);
         return redirect()->route('client.index')->with('success', 'Cliente eliminado correctamente.');
+    }
+
+    public function newOrder(Client $client)
+    {
+        $products = Product::where('status', Product::STATUS_ACTIVE)->get();
+
+        return Inertia::render('Client/NewOrder', [
+            'client' => $client,
+            'products' => $products,
+        ]);
+    }
+
+    public function attachOrder(Request $request, Client $client)
+    {
+        $request->validate([
+            'products' => ['required', 'array', 'min:1'],
+            'products.*.id' => ['required', 'exists:products,id'],
+            'products.*.quantity' => ['required', 'integer', 'min:1'],
+            'products.*.sale_price' => ['required', 'integer', 'min:0'],
+            'products.*.internal_price' => ['required', 'integer', 'min:0'],
+        ]);
+
+        $total = 0;
+        $internalTotal = 0;
+
+        foreach ($request->products as $product) {
+            $subtotal = $product['sale_price'] * $product['quantity'];
+            $internalSubtotal = $product['internal_price'] * $product['quantity'];
+
+            $total += $subtotal;
+            $internalTotal += $internalSubtotal;
+        }
+
+        $order = Order::create([
+            'client_id' => $client->id,
+            'status' => Order::STATUS_CREATED,
+            'total' => $total,
+            'internal_total' => $internalTotal,
+        ]);
+
+        $orderProducts = [];
+        foreach ($request->products as $product) {
+            $orderProducts[$product['id']] = [
+                'quantity' => $product['quantity'],
+                'price' => $product['sale_price'],
+                'subtotal' => $product['sale_price'] * $product['quantity'],
+                'internal_price' => $product['internal_price'],
+                'internal_subtotal' => $product['internal_price'] * $product['quantity'],
+            ];
+
+            $modelProduct = Product::find($product['id']);
+            $modelProduct->stock -= $product['quantity'];
+
+            if ($modelProduct->stock < 1) {
+                $modelProduct->status = Product::STATUS_INACTIVE;
+            }
+
+            $modelProduct->save();
+        }
+
+        $order->products()->attach($orderProducts);
+
+        return redirect()->route('order.edit', $order->id)->with('success', 'Pedido creado exitosamente.');
     }
 }

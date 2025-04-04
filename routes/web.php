@@ -45,11 +45,14 @@ Route::middleware('auth')->group(function () {
     Route::get('clients/show/{client}', [ClientController::class, 'show'])->name('client.show');
     Route::post('clients/update', [ClientController::class, 'update'])->name('client.update');
     Route::post('clients/store', [ClientController::class, 'store'])->name('client.store');
-    Route::delete('/client/{client}', [ClientController::class, 'destroy'])->name('client.destroy');
+    Route::delete('client/{client}', [ClientController::class, 'destroy'])->name('client.destroy');
+    Route::get('clients/order/{client}', [ClientController::class, 'newOrder'])->name('client.new.order');
+    Route::post('clients/order/attach/{client}', [ClientController::class, 'attachOrder'])->name('client.store.order');
 
     Route::get('order', [OrderController::class, 'index'])->name('order.index');
-    Route::get('order/create', [OrderController::class, 'create'])->name('order.create');
-    Route::get('order/edit', [OrderController::class, 'edit'])->name('order.edit');
+    Route::post('order/create', [OrderController::class, 'create'])->name('order.create');
+    Route::get('order/edit/{order}', [OrderController::class, 'edit'])->name('order.edit');
+    Route::get('order/show/{order}', [OrderController::class, 'show'])->name('order.show');
     Route::get('order/delete', [OrderController::class, 'create'])->name('order.delete');
 });
 
