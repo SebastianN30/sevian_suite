@@ -10,11 +10,24 @@ use Illuminate\Support\Facades\Hash;
 class UserController extends Controller
 {
     public function index(Request $request){
-        $query = User::query();
-        $users = $query->paginate(10)->appends($request->all());
+        $search = $request->input('search');
+        $users = User::query()
+            ->when($search, function ($query, $search){
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%");
+                });
+            })
+            ->latest()
+            ->paginate(10)
+            ->withQueryString();
+    
         /* dd($users); */
         return Inertia::render('User/List', [
-            'users' => $users
+            'users' => $users,
+            'filters' => [
+                'search' => $search
+            ]
         ]);
     }
 

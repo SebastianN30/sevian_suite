@@ -39,6 +39,7 @@ Route::middleware('auth')->group(function () {
     Route::get('products/new', [ProductsController::class, 'create'])->name('product.create');
     Route::get('products/edit', [ProductsController::class, 'edit'])->name('product.edit');
     Route::get('products/delete', [ProductsController::class, 'delete'])->name('product.delete');
+    Route::get('products/stock/{id}', [ProductsController::class, 'updateStock'])->name('product.updateStock');
 
     Route::get('clients', [ClientController::class, 'index'])->name('client.index');
     Route::get('clients/create', [ClientController::class, 'create'])->name('client.create');
