@@ -62,15 +62,14 @@
                                     class="odd:bg-white even:bg-gray-50 dark:odd:bg-[#1e293b] dark:even:bg-[#263140] transition">
                                     <td class="px-4 py-3 text-gray-900 dark:text-gray-100">{{ product.name }}</td>
                                     <td class="px-4 py-3 text-gray-900 dark:text-gray-100">
-                                        <input type="number" v-model.number="product.pivot.quantity"
-                                            :max="product.stock + (originalOrder.products[index].pivot.quantity || 0)"
-                                            @input="validateQuantity(product, index)"
+                                        <input type="number" v-model.number="product.quantity" :max="product.stock"
+                                            @input="validateQuantity(product)"
                                             class="w-20 p-1 border rounded dark:bg-[#2b3646] text-gray-900 dark:text-gray-100" />
                                     </td>
                                     <td class="px-4 py-3 text-gray-900 dark:text-gray-100">{{ product.stock }}</td>
                                     <td class="px-4 py-3 text-gray-700 dark:text-gray-300">{{
                                         formatCurrency(product.sale_price)
-                                    }}</td>
+                                        }}</td>
                                     <td class="px-4 py-3">
                                         <button @click="removeProduct(index)"
                                             class="bg-red-500 hover:bg-red-400 text-white py-1 px-3 rounded-lg transition">Eliminar</button>
@@ -123,7 +122,7 @@
                                     <td class="px-4 py-3 text-gray-900 dark:text-gray-100">{{ product.stock }}</td>
                                     <td class="px-4 py-3 text-gray-700 dark:text-gray-300">{{
                                         formatCurrency(product.sale_price)
-                                        }}</td>
+                                    }}</td>
                                     <td class="px-4 py-3">
                                         <button @click="addProductToList(product)"
                                             class="bg-green-500 hover:bg-green-400 text-white py-1 px-3 rounded-lg transition">Añadir</button>
@@ -146,12 +145,10 @@ import { ref, computed, watch } from 'vue';
 const page = usePage();
 const client = page.props.client;
 const products = page.props.products;
-const order = page.props.order;
-const originalOrder = JSON.parse(JSON.stringify(order));
 
 const selectedProductId = ref('');
-const selectedProducts = ref(order.products);
-const total = ref(order.total);
+const selectedProducts = ref([]);
+const total = ref(0);
 
 const errors = computed(() => page.props.value?.errors ?? {});
 const showErrors = ref(false);
@@ -170,7 +167,6 @@ const filteredProducts = computed(() => {
 
 function addProductToList(product) {
     const existingProduct = selectedProducts.value.find(p => p.id === product.id);
-    console.log(product, existingProduct);
 
     if (existingProduct) {
         if (existingProduct.quantity < product.stock) {
@@ -208,12 +204,7 @@ function removeProduct(index) {
 
 function calculateTotal() {
     total.value = selectedProducts.value.reduce((sum, product) => {
-        console.log(sum, product);
-        try {
-            return sum + (product.sale_price * product.pivot.quantity);
-        } catch (error) {
-            return sum + (product.sale_price * 1);
-        }
+        return sum + (product.sale_price * product.quantity);
     }, 0);
 }
 
@@ -227,15 +218,13 @@ function formatCurrency(value) {
     return new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(value);
 }
 
-function validateQuantity(product, index) {
-    console.log(product);
-    
-    if (product.pivot.quantity > product.stock + originalOrder.products[index].pivot.quantity) {
+function validateQuantity(product) {
+    if (product.quantity > product.stock) {
         alert('No puedes ingresar más cantidad que el stock disponible.');
-        product.pivot.quantity = product.stock + originalOrder.products[index].pivot.quantity;
-    } else if (product.pivot.quantity < 1) {
+        product.quantity = product.stock;
+    } else if (product.quantity < 1) {
         alert('La cantidad mínima es 1.');
-        product.pivot.quantity = 1;
+        product.quantity = 1;
     }
     calculateTotal();
 }

@@ -82,7 +82,7 @@
                                 <td class="px-6 py-4 text-gray-800 dark:text-gray-300">
                                     <a :href="route('client.edit', client.id)"
                                         class="text-blue-500 dark:text-blue-400 hover:text-blue-600 dark:hover:text-blue-500 underline hover:underline-offset-2 transition-colors duration-200">{{
-                                        client.name + ' ' + client.lastname }}</a>
+                                            client.name + ' ' + client.lastname }}</a>
                                 </td>
                                 <td class="px-6 py-4 text-gray-800 dark:text-gray-300">{{ client.email }}</td>
                                 <td class="px-6 py-4 text-gray-800 dark:text-gray-300">{{ client.phone_number }}</td>
@@ -91,6 +91,10 @@
                                         <Link :href="route('client.show', client.id)"
                                             class="bg-blue-500 hover:bg-blue-600 text-white p-2 rounded-lg transition-colors duration-200 shadow-sm flex items-center">
                                         <Eye class="w-5 h-5" />
+                                        </Link>
+                                        <Link :href="route('client.new.order', client.id)"
+                                            class="bg-yellow-500 hover:bg-yellow-600 text-white p-2 rounded-lg transition-colors duration-200 shadow-sm flex items-center">
+                                        <FileBadge2 class="w-5 h-5" />
                                         </Link>
                                         <button @click="confirmDelete(client.id)"
                                             class="bg-red-600 hover:bg-red-500 text-white p-2 rounded-lg transition-colors duration-200 shadow-sm flex items-center">
@@ -120,7 +124,7 @@ import Paginator from '@/Pages/Pagination/Paginator.vue';
 import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import { ref, watch, computed } from 'vue';
 import Swal from 'sweetalert2';
-import { Eye, Trash } from 'lucide-vue-next';
+import { Eye, Trash, FileBadge2 } from 'lucide-vue-next';
 
 const page = usePage();
 const props = defineProps({
@@ -164,12 +168,7 @@ const confirmDelete = (clientId) => {
                     flashSuccess.value = page.props.flash?.success || '¡Cliente eliminado correctamente!';
                     Swal.fire('¡Eliminado!', 'El cliente ha sido eliminado correctamente.', 'success');
                 }
-            });
-
-
-            /* router.delete(route('client.destroy', clientId), {
-                preserveState: false
-            }); */
+            })
         }
     });
 };

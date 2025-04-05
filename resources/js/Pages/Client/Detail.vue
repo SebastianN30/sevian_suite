@@ -8,6 +8,33 @@
             </h2>
         </template>
 
+        <div v-if="flashSuccess"
+            class="mb-4 p-4 border rounded-lg text-green-700 bg-green-100 border-green-400 dark:bg-green-900 dark:border-green-700 dark:text-green-200 transition-colors flex justify-between items-center">
+            <span>{{ flashSuccess }}</span>
+            <button @click="clearErrors"
+                class="ml-2 text-2xl font-bold rounded-full p-1 hover:bg-red-200 dark:hover:bg-red-700 transition text-red-600 dark:text-red-400">
+                &times;
+            </button>
+        </div>
+
+        <div v-if="showErrors"
+            class="mb-4 p-4 border rounded-lg bg-red-100 border-red-400 text-red-700 dark:bg-red-900 dark:border-red-700 dark:text-red-300 transition-colors duration-300">
+
+            <div class="flex justify-between items-center">
+                <h3 class="font-bold text-lg text-gray-800 dark:text-gray-200">Errores encontrados</h3>
+                <button @click="clearErrors"
+                    class="ml-2 text-4xl font-bold rounded-full p-2 hover:bg-red-200 dark:hover:bg-red-700 transition">
+                    &times;
+                </button>
+            </div>
+
+            <ul class="list-disc list-inside mt-2 space-y-1">
+                <li v-for="(error, key) in $page.props.errors" :key="key" class="text-gray-800 dark:text-gray-200">
+                    {{ error }}
+                </li>
+            </ul>
+        </div>
+
         <div class="py-8">
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
                 <div
@@ -123,7 +150,9 @@
                                 <ul class="space-y-1">
                                     <li v-for="product in order.products" :key="product.id"
                                         class="ml-4 text-gray-600 dark:text-gray-400">
-                                        <b>{{ product.name }}</b> - Cantidad: {{ product.pivot.quantity }} - Precio Unitario: ${{
+                                        <b>{{ product.name }}</b> - Cantidad: {{ product.pivot.quantity }} - Precio
+                                        Unitario:
+                                        ${{
                                             product.pivot.price.toLocaleString('es-ES') }}
                                     </li>
                                 </ul>
@@ -139,19 +168,32 @@
 
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { usePage } from '@inertiajs/vue3';
-import { ref, onMounted } from 'vue';
+import { Head, Link, router, usePage } from '@inertiajs/vue3';
+import { ref, onMounted, watch, computed } from 'vue';
 import Chart from 'chart.js/auto';
 
+const page = usePage();
 const { props } = usePage();
 const totalProfit = props.totalProfit;
 const averageProfit = props.averageProfit;
 const client = props.client;
 const topProducts = props.topProducts;
 const expandedOrder = ref(null);
+const flashSuccess = ref(page.props.flash?.success || null);
+const errors = computed(() => page.props.value?.errors ?? {});
+const showErrors = ref(false);
 
 function toggleOrder(orderId) {
     expandedOrder.value = expandedOrder.value === orderId ? null : orderId;
+}
+
+watch(errors, (newErrors) => {
+    showErrors.value = Object.keys(newErrors).length > 0;
+});
+
+function clearErrors() {
+    showErrors.value = false;
+    flashSuccess.value = null;
 }
 
 onMounted(() => {
