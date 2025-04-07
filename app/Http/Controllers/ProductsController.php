@@ -91,7 +91,7 @@ class ProductsController extends Controller
         try {
             $validate = $request->validate([
                 'adjustment' => 'integer',
-                'note' => 'string'
+                'note' => 'nullable|string'
             ]);
             $product = Product::find($id);
             $addStock = $product->stock + $validate['adjustment'];
