@@ -28,10 +28,13 @@
                         </div>
                         <div class="mb-4">
                             <label for="password" class="block text-sm font-medium text-white ">Confirmar contraseña</label>
-                            <input v-model="form.password_confirmation" type="password" id="password" 
+                            <input v-model="form.password_confirmation" type="password" id="password_confirmation" 
                                 name="password" class="mt-1 p-2 border rounded-md w-full" placeholder="Confirmar contraseña" required>
                         </div>
-                        <button type="submit" class="bg-blue-500 text-white py-2 px-4 rounded">Crear usuario</button>
+                        <div class="flex space-x-4">
+                            <button type="submit" class="bg-blue-500 text-white py-2 px-4 rounded">Crear usuario</button>
+                            <button type="button" @click="back" class="bg-red-500 text-white py-2 px-4 rounded">Regresar</button>
+                        </div>
                     </form>
                 </div>
             </div>
@@ -40,7 +43,7 @@
 </template>
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head, Link, useForm } from '@inertiajs/vue3';
+import { Head, Link, useForm, router } from '@inertiajs/vue3';
 
 const props = defineProps({
 
@@ -55,5 +58,9 @@ const form = useForm({
 
 function submit(){
     form.post(route('user.store'));
+}
+
+function back() {
+    router.visit(route('user.index'));
 }
 </script>
