@@ -42,8 +42,8 @@
                                 <button 
                                     type="button" 
                                     @click="adjustStock(-1)"
+                                    v-if="form.product.stock > 0"
                                     class="p-2 rounded-md bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors"
-                                    :disabled="form.adjustment <= 0"
                                 >
                                     <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path>
@@ -55,7 +55,6 @@
                                     id="stock_adjustment" 
                                     v-model.number="form.adjustment"
                                     class="flex-1 px-3 py-2 rounded-md border border-gray-300 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white sm:text-sm text-center"
-                                    min="0"
                                     required
                                 >
                                 
@@ -136,6 +135,8 @@ import { router } from '@inertiajs/vue3';
 const props = defineProps(['isOpen', 'product']);
 
 const emit = defineEmits(['close', 'updated']);
+
+console.log(props.product.stock);
 
 // Formulario reactivo
 const form = ref({

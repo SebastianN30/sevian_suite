@@ -1,5 +1,4 @@
 <template>
-
     <Head title="Crear cliente" />
     <AuthenticatedLayout>
         <template #header>
