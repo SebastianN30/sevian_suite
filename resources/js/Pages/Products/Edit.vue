@@ -6,18 +6,22 @@
                 Editar producto
             </h2>
         </template>
-        <div v-if="$page.props.errors && Object.keys($page.props.errors).length > 0" 
-            class="mt-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
+
+        <!-- Sección de errores -->
+        <div v-if="form.errors && Object.keys(form.errors).length > 0" 
+            class="max-w-2xl mx-auto mt-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
+            <p class="font-bold mb-2">Por favor corrige los siguientes errores:</p>
             <ul class="list-disc list-inside">
-                <li v-for="(error, key) in $page.props.errors" :key="key">
+                <li v-for="(error, key) in form.errors" :key="key">
                     {{ error }}
                 </li>
             </ul>
         </div>
+
         <div class="py-12">
             <div class="max-w-2xl mx-auto sm:px-6 lg:px-8 space-y-6">
                 <div class="p-4 sm:p-8 dark:bg-gray-800 border border-gray-200 shadow sm:rounded-lg">
-                    <form action="">
+                    <form @submit.prevent="submit">
                         <div class="mb-4">
                             <label for="image" class="block text-sm font-medium text-white mb-2">Imagen del producto</label>
                             <div class="flex items-center justify-center w-full">
@@ -47,22 +51,26 @@
                         </div>
                         <div class="mb-4">
                             <label for="name" class="block text-sm font-medium text-white ">Nombre</label>
-                            <input type="text" id="name" 
+                            <input type="text" id="name"
+                                v-model="form.name"
                                 name="name" class="mt-1 p-2 border rounded-md w-full" placeholder="Nombre" required>
                         </div>
                         <div class="mb-4">
                             <label for="name" class="block text-sm font-medium text-white ">Precio base</label>
-                            <input type="number" id="name" 
+                            <input type="number" id="name"
+                                v-model="form.internal_price" 
                                 name="name" class="mt-1 p-2 border rounded-md w-full" placeholder="Precio base" required>
                         </div>
                         <div class="mb-4">
                             <label for="name" class="block text-sm font-medium text-white ">Porcentaje de ganancia</label>
-                            <input type="number" id="name" 
+                            <input type="number" id="name"
+                                v-model="form.profit_percentage"
                                 name="name" class="mt-1 p-2 border rounded-md w-full" placeholder="Porcentaje de ganancia" required>
                         </div>
                         <div class="mb-4">
                             <label for="name" class="block text-sm font-medium text-white ">Cantidad</label>
                             <input type="number" id="name" 
+                                v-model="form.stock"
                                 name="name" class="mt-1 p-2 border rounded-md w-full" placeholder="Cantidad" required>
                         </div>
                         <div class="flex space-x-4">
@@ -77,11 +85,36 @@
 </template>
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import Paginator from '@/Pages/Pagination/Paginator.vue';
-import { Head, Link, router } from '@inertiajs/vue3';
+import { Head, Link, router, useForm } from '@inertiajs/vue3';
 import { ref } from 'vue';
 
 const imagePreview = ref(null);
+
+const props = defineProps({
+    product: Object,
+    errors: Object
+});
+
+const form = useForm({
+    id: props.product.id,
+    image: props.product.image,
+    name: props.product.name,
+    internal_price: props.product.internal_price,
+    profit_percentage: props.product.profit_percentage,
+    stock: props.product.stock
+});
+
+const submit = () => {
+    form.post(route('product.update'), {
+        preserveScroll: true,
+        onError: (errors) => {
+            console.log('Errores de validación:', errors);
+        },
+        onSuccess: () => {
+            console.log('Actualización exitosa');
+        }
+    });
+}
 
 const handleImageUpload = (event) => {
     const file = event.target.files[0];

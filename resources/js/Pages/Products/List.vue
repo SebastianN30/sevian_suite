@@ -76,7 +76,7 @@
                                             >
                                             <PackageOpen />
                                         </button>
-                                        <Link :href="route('product.edit')"
+                                        <Link :href="route('product.edit', product.id)"
                                             class="mt-4 inline-block bg-blue-600 hover:bg-blue-500 text-white py-2 px-4 rounded transition-colors duration-200">
                                             <SquarePen/>
                                         </Link>
