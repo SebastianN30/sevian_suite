@@ -6,6 +6,11 @@
                 Productos
             </h2>
         </template>
+        <div v-if="flashSuccess" class="max-w-7xl mx-auto px-6 sm:px-8 mt-4">
+            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
+                <span class="block sm:inline">{{ flashSuccess }}</span>
+            </div>
+        </div>
         <div class="py-12">
             <div class="max-w-7xl mx-auto px-6 sm:px-8 space-y-6 border border-gray-300 dark:border-gray-700 rounded-2xl shadow-lg bg-white dark:bg-gray-800">
                 <div class="p-6 flex justify-between items-center border-b border-gray-300 dark:border-gray-700">

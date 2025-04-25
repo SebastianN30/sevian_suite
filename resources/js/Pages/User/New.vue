@@ -6,6 +6,22 @@
                 Crear usuario
             </h2>
         </template>
+        <div v-if="showErrors"
+            class="mb-4 p-2 bg-red-100 dark:bg-red-900 border-red-400 dark:border-red-700 text-red-700 dark:text-red-300 transition-colors duration-300">
+            <div class="flex justify-between items-center">
+                <h3 class="font-bold text-lg dark:text-white">Errores encontrados</h3>
+                <button @click="clearErrors"
+                    class="ml-2 text-4xl font-bold rounded-full p-2 hover:bg-red-200 dark:hover:bg-red-700 transition">
+                    &times;
+                </button>
+            </div>
+
+            <ul class="list-disc list-inside mt-2 space-y-1">
+                <li v-for="(error, key) in $page.props.errors" :key="key" class="dark:text-red-300">
+                    {{ error }}
+                </li>
+            </ul>
+        </div>
         <div class="py-12">
             <div class="max-w-2xl mx-auto sm:px-6 lg:px-8 space-y-6">
                 <div class="p-4 sm:p-8 dark:bg-gray-800 border border-gray-200 shadow sm:rounded-lg">
@@ -43,8 +59,10 @@
 </template>
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head, Link, useForm, router } from '@inertiajs/vue3';
+import { Head, Link, useForm, router, usePage } from '@inertiajs/vue3';
+import { ref, computed, watch } from 'vue';
 
+const page = usePage();
 const props = defineProps({
 
 });
@@ -56,8 +74,25 @@ const form = useForm({
     password_confirmation: ''
 });
 
-function submit(){
-    form.post(route('user.store'));
+const errors = computed(() => page.props.value?.errors ?? {});
+const showErrors = ref(false);
+
+watch(errors, (newErrors) => {
+    showErrors.value = Object.keys(newErrors).length > 0;
+});
+
+function clearErrors() {
+    showErrors.value = false;
+    form.clearErrors();
+}
+
+function submit(e){
+    e.preventDefault();
+    form.post(route('user.store'), {
+        onError: () => {
+            showErrors.value = true;
+        }
+    });
 }
 
 function back() {

@@ -6,10 +6,18 @@
                 Crear producto
             </h2>
         </template>
-        <div v-if="$page.props.errors && Object.keys($page.props.errors).length > 0" 
-            class="mt-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
-            <ul class="list-disc list-inside">
-                <li v-for="(error, key) in $page.props.errors" :key="key">
+        <div v-if="showErrors"
+            class="mb-4 p-2 bg-red-100 dark:bg-red-900 border-red-400 dark:border-red-700 text-red-700 dark:text-red-300 transition-colors duration-300">
+            <div class="flex justify-between items-center">
+                <h3 class="font-bold text-lg dark:text-white">Errores encontrados</h3>
+                <button @click="clearErrors"
+                    class="ml-2 text-4xl font-bold rounded-full p-2 hover:bg-red-200 dark:hover:bg-red-700 transition">
+                    &times;
+                </button>
+            </div>
+
+            <ul class="list-disc list-inside mt-2 space-y-1">
+                <li v-for="(error, key) in $page.props.errors" :key="key" class="dark:text-red-300">
                     {{ error }}
                 </li>
             </ul>
@@ -17,7 +25,7 @@
         <div class="py-12">
             <div class="max-w-2xl mx-auto sm:px-6 lg:px-8 space-y-6">
                 <div class="p-4 sm:p-8 dark:bg-gray-800 border border-gray-200 shadow sm:rounded-lg">
-                    <form action="">
+                    <form @submit="submit">
                         <div class="mb-4">
                             <label for="image" class="block text-sm font-medium text-white mb-2">Imagen del producto</label>
                             <div class="flex items-center justify-center w-full">
@@ -47,22 +55,22 @@
                         </div>
                         <div class="mb-4">
                             <label for="name" class="block text-sm font-medium text-white ">Nombre</label>
-                            <input type="text" id="name" 
+                            <input type="text" id="name" v-model="form.name"
                                 name="name" class="mt-1 p-2 border rounded-md w-full" placeholder="Nombre" required>
                         </div>
                         <div class="mb-4">
                             <label for="name" class="block text-sm font-medium text-white ">Precio base</label>
-                            <input type="number" id="name" 
+                            <input type="number" id="name" v-model="form.internal_price"
                                 name="name" class="mt-1 p-2 border rounded-md w-full" placeholder="Precio base" required>
                         </div>
                         <div class="mb-4">
                             <label for="name" class="block text-sm font-medium text-white ">Porcentaje de ganancia</label>
-                            <input type="number" id="name" 
+                            <input type="number" id="name" v-model="form.profit_percentage"
                                 name="name" class="mt-1 p-2 border rounded-md w-full" placeholder="Porcentaje de ganancia" required>
                         </div>
                         <div class="mb-4">
                             <label for="name" class="block text-sm font-medium text-white ">Cantidad</label>
-                            <input type="number" id="name" 
+                            <input type="number" id="name" v-model="form.stock"
                                 name="name" class="mt-1 p-2 border rounded-md w-full" placeholder="Cantidad" required>
                         </div>
                         <div class="flex space-x-4">
@@ -78,8 +86,17 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import Paginator from '@/Pages/Pagination/Paginator.vue';
-import { Head, Link, router } from '@inertiajs/vue3';
-import { ref } from 'vue';
+import { Head, Link, useForm, router, usePage } from '@inertiajs/vue3';
+import { ref, computed, watch } from 'vue';
+
+const page = usePage();
+
+const form = useForm({
+    name: '',
+    internal_price: '',
+    profit_percentage: '',
+    stock: ''
+});
 
 const imagePreview = ref(null);
 
@@ -94,7 +111,29 @@ const handleImageUpload = (event) => {
     }
 };
 
+const errors = computed(() => page.props.value?.errors ?? {});
+const showErrors = ref(false);
+
+watch(errors, (newErrors) => {
+    showErrors.value = Object.keys(newErrors).length > 0;
+});
+
+function clearErrors() {
+    showErrors.value = false;
+    form.clearErrors();
+}
+
 function back(){
-    router.visit(route('product.index'));
+    router.visit(route('product.index')
+    );
+}
+
+function submit(e){
+    e.preventDefault();
+    form.post(route('product.store'), {
+        onError: () => {
+            showErrors.value = true;
+        }
+    })
 }
 </script>

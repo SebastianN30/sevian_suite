@@ -50,7 +50,32 @@ class ProductsController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        try {
+            $validate = $request->validate([
+                'name' => 'required|string',
+                'internal_price' => 'required|integer',
+                'profit_percentage' => 'required|integer',
+                'stock' => 'required|integer'
+            ]);
+
+            $profit = ($validate['internal_price'] * $validate['profit_percentage']) / 100;
+            $salePrice = $validate['internal_price'] + $profit;
+
+            $product = Product::create([
+                'name' => $validate['name'],
+                'internal_price' => $validate['internal_price'],
+                'profit_percentage' => $validate['profit_percentage'],
+                'stock' => $validate['stock'],
+                'sale_price' => $salePrice
+            ]);
+
+            return redirect()->route('product.index')->with('success', 'Producto creado correctamente');
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return back()->withErrors($e->errors())->withInput();
+        } catch (\Exception $e) {
+            return back()->with('error', 'Error al crear el producto')->withInput();
+        }
     }
 
     /**
