@@ -16,6 +16,7 @@ class Product extends Model
         'image',
         'name',
         'stock',
+        'note',
         'internal_price',
         'profit_percentage',
         'sale_price',
@@ -24,6 +25,6 @@ class Product extends Model
 
     public function orders()
     {
-        return $this->belongsToMany(Order::class, 'order_product')->withPivot('quantity', 'price', 'subtotal', 'internal_price', 'internal_subtotal')->withTimestamps();
+        return $this->belongsToMany(Order::class, 'order_product')->withPivot('quantity', 'price', 'subtotal', 'internal_price', 'internal_subtotal', 'change')->withTimestamps();
     }
 }

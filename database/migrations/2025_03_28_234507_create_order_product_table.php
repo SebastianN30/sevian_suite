@@ -20,6 +20,7 @@ return new class extends Migration
             $table->integer('subtotal')->nullable();
             $table->integer('internal_price')->nullable();
             $table->integer('internal_subtotal')->nullable();
+            $table->integer('change')->nullable();
             $table->timestamps();
         });
     }

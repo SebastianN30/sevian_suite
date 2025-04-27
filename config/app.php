@@ -82,7 +82,7 @@ return [
 
     'fallback_locale' => 'en',
 
-    'faker_locale' => 'es_CO',
+    'faker_locale' => 'es_ES',
 
     /*
     |--------------------------------------------------------------------------

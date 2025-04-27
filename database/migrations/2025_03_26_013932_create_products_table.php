@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('image')->nullable();
             $table->string('name')->nullable();
             $table->integer('stock')->nullable();
+            $table->text('note')->nullable();
             $table->integer('internal_price')->nullable();
             $table->integer('profit_percentage')->nullable();
             $table->integer('sale_price')->nullable();

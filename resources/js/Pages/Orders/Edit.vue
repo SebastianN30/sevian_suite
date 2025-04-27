@@ -1,11 +1,12 @@
 <template>
 
-    <Head title="Nuevo Pedido" />
+    <Head :title="client.name + ' ' + client.lastname" />
 
     <AuthenticatedLayout>
         <template #header>
             <h2 class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-100">Nuevo Pedido</h2>
         </template>
+        {{ flashSuccess }}
 
         <div v-if="flashSuccess"
             class="mb-4 p-4 border rounded-lg text-green-700 bg-green-100 border-green-400 dark:bg-green-900 dark:border-green-700 dark:text-green-200 transition-colors flex justify-between items-center">
@@ -38,7 +39,24 @@
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
                 <div
                     class="p-6 bg-white dark:bg-[#1e293b] shadow-md sm:rounded-2xl transition-all border border-gray-200 dark:border-gray-700">
+                    <div class="mb-6 p-4 rounded-lg text-center font-bold text-xl" :class="{
+                        'bg-green-200 text-green-800 dark:bg-green-700 dark:text-green-200': order.status === 'completada',
+                        'bg-yellow-200 text-yellow-800 dark:bg-yellow-700 dark:text-yellow-200': order.status === 'creada',
+                        'bg-red-200 text-red-800 dark:bg-red-700 dark:text-red-200': order.status === 'pendiente'
+                    }">
+                        ESTADO DE LA ORDEN: {{ order.status.toUpperCase() }}
+                    </div>
 
+                    <div class="mt-6 text-center" v-if="order.status === 'creada' || order.status === 'pendiente'">
+                        <button @click="changeStatus('pendiente')" v-if="order.status === 'creada'"
+                            class="bg-yellow-500 hover:bg-yellow-400 text-white py-2 px-4 rounded-lg mr-4 transition">
+                            Pasar a Pendiente
+                        </button>
+                        <button @click="deleteOrder" v-if="order.status === 'creada' || order.status === 'pendiente'"
+                            class="bg-red-500 hover:bg-red-400 text-white py-2 px-4 rounded-lg transition">
+                            Eliminar Orden
+                        </button>
+                    </div>
                     <div class="mb-6">
                         <h3 class="text-lg font-bold text-gray-900 dark:text-white">Cliente: {{ client.name }} {{
                             client.lastname }}</h3>
@@ -52,26 +70,45 @@
                                 <tr class="bg-gray-100 dark:bg-[#334155] text-gray-700 dark:text-gray-300">
                                     <th class="px-4 py-3">Producto</th>
                                     <th class="px-4 py-3">Cantidad</th>
-                                    <th class="px-4 py-3">Stock Disponible</th>
+                                    <th class="px-4 py-3" v-if="order.status === 'creada'">Stock Disponible</th>
                                     <th class="px-4 py-3">Precio</th>
-                                    <th class="px-4 py-3">Acciones</th>
+                                    <th class="px-4 py-3" v-if="order.status === 'creada'">Acciones</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr v-for="(product, index) in selectedProducts" :key="index"
                                     class="odd:bg-white even:bg-gray-50 dark:odd:bg-[#1e293b] dark:even:bg-[#263140] transition">
-                                    <td class="px-4 py-3 text-gray-900 dark:text-gray-100">{{ product.name }}</td>
-                                    <td class="px-4 py-3 text-gray-900 dark:text-gray-100">
+                                    <td class="px-4 py-3 text-gray-900 dark:text-gray-100"><a
+                                            :href="route('product.edit', product.id)"
+                                            class="text-blue-500 dark:text-blue-400 hover:text-blue-600 dark:hover:text-blue-500 underline hover:underline-offset-2 transition-colors duration-200">{{
+                                                product.name }}</a></td>
+                                    <td class="px-4 py-3 text-gray-900 dark:text-gray-100"
+                                        v-if="order.status === 'creada'">
                                         <input type="number" v-model.number="product.pivot.quantity"
-                                            :max="product.stock + (originalOrder.products[index].pivot.quantity || 0)"
+                                            :max="product.stock + (originalOrder.products[index]?.pivot.quantity ?? 0)"
                                             @input="validateQuantity(product, index)"
                                             class="w-20 p-1 border rounded dark:bg-[#2b3646] text-gray-900 dark:text-gray-100" />
                                     </td>
-                                    <td class="px-4 py-3 text-gray-900 dark:text-gray-100">{{ product.stock }}</td>
+                                    <td class="px-4 py-3 text-gray-900 dark:text-gray-100" v-else>{{
+                                        product.pivot.quantity }}
+                                    </td>
+                                    <td class="px-4 py-3 text-gray-900 dark:text-gray-100"
+                                        v-if="order.status === 'creada'">{{
+                                            product.stock }}</td>
                                     <td class="px-4 py-3 text-gray-700 dark:text-gray-300">{{
                                         formatCurrency(product.sale_price)
-                                    }}</td>
-                                    <td class="px-4 py-3">
+                                    }}
+                                        <template v-if="product.pivot.change && order.status == 'creada'">
+                                            <br>
+                                            <small
+                                                :class="{ 'text-green-500': product.pivot.change > 0, 'text-red-500': product.pivot.change < 0 }"
+                                                class="text-xs">
+                                                Cambio: {{ product.pivot.change > 0 ? '+' : '' }}{{
+                                                    formatCurrency(product.pivot.change) }}
+                                            </small>
+                                        </template>
+                                    </td>
+                                    <td class="px-4 py-3" v-if="order.status === 'creada'">
                                         <button @click="removeProduct(index)"
                                             class="bg-red-500 hover:bg-red-400 text-white py-1 px-3 rounded-lg transition">Eliminar</button>
                                     </td>
@@ -81,7 +118,7 @@
                     </div>
 
                     <!-- Buscador de productos -->
-                    <div class="mt-6">
+                    <div class="mt-6" v-if="order.status === 'creada'">
                         <label for="productSearch"
                             class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-100">Buscar
                             Producto</label>
@@ -97,11 +134,12 @@
                             <span class="text-xl font-bold text-blue-500">{{ formatCurrency(total) }}</span>
                         </div>
                         <button @click="submitOrder"
-                            class="mt-4 bg-blue-600 hover:bg-blue-500 text-white py-2 px-4 rounded-lg transition-all">Crear
+                            class="mt-4 bg-blue-600 hover:bg-blue-500 text-white py-2 px-4 rounded-lg transition-all"
+                            v-if="order.status === 'creada'">Editar
                             Pedido</button>
                     </div>
 
-                    <div class="overflow-x-auto rounded-lg mt-6">
+                    <div class="overflow-x-auto rounded-lg mt-6" v-if="order.status === 'creada'">
                         <table class="w-full text-left border-collapse">
                             <thead>
                                 <tr class="bg-gray-100 dark:bg-[#334155] text-gray-700 dark:text-gray-300">
@@ -141,7 +179,8 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, usePage, router } from '@inertiajs/vue3';
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, onMounted } from 'vue';
+import Swal from 'sweetalert2';
 
 const page = usePage();
 const client = page.props.client;
@@ -170,11 +209,11 @@ const filteredProducts = computed(() => {
 
 function addProductToList(product) {
     const existingProduct = selectedProducts.value.find(p => p.id === product.id);
-    console.log(product, existingProduct);
 
     if (existingProduct) {
-        if (existingProduct.quantity < product.stock) {
-            existingProduct.quantity++;
+        const productIndex = selectedProducts.value.findIndex(p => p.id === product.id);
+        if (existingProduct.pivot.quantity < (originalOrder.products[productIndex].pivot.quantity + product.stock)) {
+            existingProduct.pivot.quantity++;
             calculateTotal();
         } else {
             alert('No puedes agregar más de la cantidad disponible en stock.');
@@ -183,7 +222,10 @@ function addProductToList(product) {
         if (product.stock > 0) {
             selectedProducts.value.push({
                 ...product,
-                quantity: 1
+                pivot: {
+                    quantity: 1,
+                    new: true
+                }
             });
             calculateTotal();
         } else {
@@ -196,6 +238,12 @@ watch(errors, (newErrors) => {
     showErrors.value = Object.keys(newErrors).length > 0;
 });
 
+watch(() => page.props.flash?.success, (newFlash) => {
+    if (newFlash) {
+        flashSuccess.value = newFlash;
+    }
+});
+
 function clearErrors() {
     showErrors.value = false;
     flashSuccess.value = null;
@@ -203,6 +251,7 @@ function clearErrors() {
 
 function removeProduct(index) {
     selectedProducts.value.splice(index, 1);
+    originalOrder.products.splice(index, 1);
     calculateTotal();
 }
 
@@ -218,26 +267,52 @@ function calculateTotal() {
 }
 
 function submitOrder() {
-    router.post(route('client.store.order', client.id), {
-        products: selectedProducts.value
+    router.post(route('order.update'), {
+        products: selectedProducts.value,
+        client: client.id,
+        order: order.id
+    }, {
+        onError: () => {
+            showErrors.value = true;
+        },
+        onSuccess: () => {
+            router.reload();
+        }
     });
 }
+
 
 function formatCurrency(value) {
     return new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(value);
 }
 
 function validateQuantity(product, index) {
-    console.log(product);
-    
-    if (product.pivot.quantity > product.stock + originalOrder.products[index].pivot.quantity) {
+    if (product.pivot.quantity > product.stock + (originalOrder.products[index]?.pivot.quantity ?? 0)) {
         alert('No puedes ingresar más cantidad que el stock disponible.');
-        product.pivot.quantity = product.stock + originalOrder.products[index].pivot.quantity;
-    } else if (product.pivot.quantity < 1) {
+        product.pivot.quantity = product.stock + (originalOrder.products[index]?.pivot.quantity ?? 0);
+    } else if (product.pivot.quantity === 0) {
         alert('La cantidad mínima es 1.');
         product.pivot.quantity = 1;
     }
     calculateTotal();
 }
 
+function changeStatus(newStatus) {
+    router.get(route('order.changestatus'), {
+        status: newStatus,
+        order: order.id
+    }, {
+        onError: () => {
+            showErrors.value = true;
+        }
+    });
+}
+
+function deleteOrder() {
+    router.delete(route('order.destroy', order.id), {
+        onError: () => {
+            showErrors.value = true;
+        }
+    });
+}
 </script>

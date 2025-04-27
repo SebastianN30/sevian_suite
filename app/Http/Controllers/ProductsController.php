@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Order;
 use Inertia\Inertia;
 use App\Models\Product;
 use Illuminate\Http\Request;
@@ -11,22 +12,23 @@ class ProductsController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request){
-            $search = $request->input('search');
-            $products = Product::query()
-                ->when($search, function ($query, $search){
-                    $query->where(function ($q) use ($search) {
-                        $q->where('name', 'like', "%{$search}%")
-                            ->orWhere('stock', 'like', "%{$search}%")
-                            ->orWhere('internal_price', 'like', "%{$search}%")
-                            ->orWhere('profit_percentage', 'like', "%{$search}%")
-                            ->orWhere('sale_price', 'like', "%{$search}%")
-                            ->orWhere('status', 'like', "%{$search}%");
-                    });
-                })
-                ->with('orders')
-                ->latest()
-                ->paginate(8);
+    public function index(Request $request)
+    {
+        $search = $request->input('search');
+        $products = Product::query()
+            ->when($search, function ($query, $search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                        ->orWhere('stock', 'like', "%{$search}%")
+                        ->orWhere('internal_price', 'like', "%{$search}%")
+                        ->orWhere('profit_percentage', 'like', "%{$search}%")
+                        ->orWhere('sale_price', 'like', "%{$search}%")
+                        ->orWhere('status', 'like', "%{$search}%");
+                });
+            })
+            ->with('orders')
+            ->latest()
+            ->paginate(8);
         return Inertia::render('Products/List', [
             'products' => $products,
             'filters' => [
@@ -40,9 +42,7 @@ class ProductsController extends Controller
      */
     public function create()
     {
-        return Inertia::render('Products/New', [
-
-        ]);
+        return Inertia::render('Products/New', []);
     }
 
     /**
@@ -70,7 +70,6 @@ class ProductsController extends Controller
             ]);
 
             return redirect()->route('product.index')->with('success', 'Producto creado correctamente');
-
         } catch (\Illuminate\Validation\ValidationException $e) {
             return back()->withErrors($e->errors())->withInput();
         } catch (\Exception $e) {
@@ -92,7 +91,7 @@ class ProductsController extends Controller
     public function edit($id)
     {
         $product = Product::where('id', $id)->first();
-        if(!$product){
+        if (!$product) {
             return redirect()->route('product.index')->with('error', 'Producto no encontrado');
         }
         return Inertia::render('Products/Edit', [
@@ -120,11 +119,37 @@ class ProductsController extends Controller
             $product->internal_price = $validate['internal_price'];
             $product->profit_percentage = $validate['profit_percentage'];
             $product->stock = $validate['stock'];
+            $product->sale_price = ceil((($validate['internal_price'] * $product->profit_percentage) / 100) + $validate['internal_price']);
+
+            if ($product->stock > 0) {
+                $product->status = Product::STATUS_ACTIVE;
+            } else {
+                $product->status = Product::STATUS_INACTIVE;
+            }
 
             $product->save();
 
+            $orders = $product->orders()->where('status', Order::STATUS_CREATED)->get();
+
+            foreach ($orders as $order) {
+                $oldPrice = $order->pivot->price;
+                $newPrice = $product->sale_price;
+
+                if ($oldPrice != $newPrice) {
+                    $change = $newPrice - $oldPrice;
+
+                    $order->pivot->update([
+                        'price' => $newPrice,
+                        'subtotal' => $order->pivot->quantity * $newPrice,
+                        'internal_price' => $product->internal_price,
+                        'internal_subtotal' => $order->pivot->quantity * $product->internal_price,
+                        'change' => $change,
+                    ]);
+                }
+            }
+
             return redirect()->route('product.index')
-                    ->with('success', 'producto acutalizado.');
+                ->with('success', 'producto acutalizado.');
         } catch (\Illuminate\Validation\ValidationException $e) {
             return back()->withErrors($e->errors())->withInput();
         } catch (\Exception $e) {
@@ -140,7 +165,8 @@ class ProductsController extends Controller
         //
     }
 
-    public function updateStock(Request $request, $id){
+    public function updateStock(Request $request, $id)
+    {
         try {
             $validate = $request->validate([
                 'adjustment' => 'integer',
@@ -151,7 +177,6 @@ class ProductsController extends Controller
             $product->stock = $addStock;
             $product->note = $validate['note'];
             $product->save();
-
         } catch (\Illuminate\Validation\ValidationException $e) {
             return back()->withErrors($e->errors())->withInput();
         } catch (\Exception $e) {

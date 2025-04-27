@@ -26,6 +26,7 @@ class ProductFactory extends Factory
             'image' => 'https://placehold.co/800@3x.png?text=' . $name,
             'name' => $name,
             'stock' => fake()->randomDigitNot(0),
+            'note' => fake()->paragraph(),
             'internal_price' => $internalPrice,
             'profit_percentage' => $percentage,
             'sale_price' => $salePrice,

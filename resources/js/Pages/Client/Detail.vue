@@ -157,6 +157,13 @@
                                     </li>
                                 </ul>
                             </div>
+
+                            <div class="mt-4">
+                                <a class="inline-block px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white text-sm font-bold rounded transition"
+                                    :href="route('order.edit', order.id)" @click.stop>
+                                    Ver esta orden
+                                </a>
+                            </div>
                         </div>
                     </div>
                     <div v-else class="text-gray-600 dark:text-gray-400">Este cliente aún no tiene órdenes.</div>
