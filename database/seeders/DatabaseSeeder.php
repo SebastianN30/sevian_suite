@@ -34,7 +34,7 @@ class DatabaseSeeder extends Seeder
         $products = Product::factory()->state(['status' => Product::STATUS_ACTIVE])->count(300)->create();
         echo "---CREANDO ORDENES---\n";
         foreach ($clients as $client) {
-            foreach ([Order::STATUS_COMPLETED, Order::STATUS_CANCELLED, Order::STATUS_PENDING, Order::STATUS_CREATED] as $status) {
+            foreach ([Order::STATUS_COMPLETED, Order::STATUS_PENDING, Order::STATUS_CREATED] as $status) {
                 $order = Order::create([
                     'client_id' => $client->id,
                     'status' => $status
