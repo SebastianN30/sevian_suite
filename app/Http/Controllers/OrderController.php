@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\OrderConfirmed;
 use Inertia\Inertia;
 use App\Models\Order;
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 
 class OrderController extends Controller
 {
@@ -177,6 +179,10 @@ class OrderController extends Controller
 
         $order->status = $request->status;
         $order->save();
+
+        if ($request->status == Order::STATUS_PENDING) {
+            Mail::to($order->client->email)->send(new OrderConfirmed($order));
+        }
 
         return redirect()->route('order.edit', $order->id)->with('success', 'Pedido actualizado exitosamente.');
     }
