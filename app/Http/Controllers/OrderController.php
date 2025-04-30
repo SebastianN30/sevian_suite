@@ -180,9 +180,9 @@ class OrderController extends Controller
         $order->status = $request->status;
         $order->save();
 
-        if ($request->status == Order::STATUS_PENDING) {
+        /* if ($request->status == Order::STATUS_PENDING) {
             Mail::to($order->client->email)->send(new OrderConfirmed($order));
-        }
+        } */
 
         return redirect()->route('order.edit', $order->id)->with('success', 'Pedido actualizado exitosamente.');
     }
