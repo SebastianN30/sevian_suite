@@ -54,19 +54,21 @@ class ProductsController extends Controller
             $validate = $request->validate([
                 'name' => 'required|string',
                 'internal_price' => 'required|integer',
-                'profit_percentage' => 'required|integer',
-                'stock' => 'required|integer'
+                'profit_percentage' => 'required',
+                'stock' => 'required|integer',
+                'sale_price' => 'required|integer',
             ]);
 
-            $profit = ($validate['internal_price'] * $validate['profit_percentage']) / 100;
-            $salePrice = $validate['internal_price'] + $profit;
-
+            /* $profit = ($validate['internal_price'] * $validate['profit_percentage']) / 100;
+            $salePrice = $validate['internal_price'] + $profit; */
+            $percentage = number_format($validate['profit_percentage'], 2, '.', '');
             $product = Product::create([
                 'name' => $validate['name'],
                 'internal_price' => $validate['internal_price'],
-                'profit_percentage' => $validate['profit_percentage'],
+                'profit_percentage' => $percentage,
                 'stock' => $validate['stock'],
-                'sale_price' => $salePrice
+                'sale_price' => $validate['sale_price'],
+                'status' => 1
             ]);
 
             return redirect()->route('product.index')->with('success', 'Producto creado correctamente');

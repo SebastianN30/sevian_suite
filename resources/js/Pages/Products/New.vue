@@ -64,10 +64,24 @@
                                 name="name" class="mt-1 p-2 border rounded-md w-full" placeholder="Precio base" required>
                         </div>
                         <div class="mb-4">
+                            <label for="name" class="block text-sm font-medium text-white ">Precio de venta</label>
+                            <input type="number" id="name" v-model="form.sale_price"
+                                name="name" class="mt-1 p-2 border rounded-md w-full" placeholder="Precio de venta" required>
+                        </div>
+                        <div class="p-3 bg-blue-50 dark:bg-gray-700 rounded-lg mb-4" v-if="calculatedPercentage > 0">
+                            <p class="text-sm text-gray-600 dark:text-gray-400">Procentaje de ganancia</p>
+                            <p class="text-lg font-bold" :class="{
+                                'text-green-600': calculatedPercentage > 20,
+                                'text-red-600': calculatedPercentage < 20
+                            }">
+                                {{ calculatedPercentage }}%
+                            </p>
+                        </div>
+                        <!-- <div class="mb-4">
                             <label for="name" class="block text-sm font-medium text-white ">Porcentaje de ganancia</label>
                             <input type="number" id="name" v-model="form.profit_percentage"
-                                name="name" class="mt-1 p-2 border rounded-md w-full" placeholder="Porcentaje de ganancia" required>
-                        </div>
+                                name="name" class="mt-1 p-2 border rounded-md w-full"required>
+                        </div> -->
                         <div class="mb-4">
                             <label for="name" class="block text-sm font-medium text-white ">Cantidad</label>
                             <input type="number" id="name" v-model="form.stock"
@@ -85,7 +99,6 @@
 </template>
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import Paginator from '@/Pages/Pagination/Paginator.vue';
 import { Head, Link, useForm, router, usePage } from '@inertiajs/vue3';
 import { ref, computed, watch } from 'vue';
 
@@ -94,8 +107,9 @@ const page = usePage();
 const form = useForm({
     name: '',
     internal_price: '',
-    profit_percentage: '',
-    stock: ''
+    profit_percentage: 0,
+    stock: '',
+    sale_price: ''
 });
 
 const imagePreview = ref(null);
@@ -105,11 +119,19 @@ const handleImageUpload = (event) => {
     if (file) {
         // Crear URL temporal para la vista previa
         imagePreview.value = URL.createObjectURL(file);
-        
-        // Aquí puedes manejar la subida del archivo
-        // Por ejemplo, agregarlo a un FormData para enviarlo al servidor
     }
 };
+
+const calculatedPercentage = computed(() => {
+    if (!form.internal_price || !form.sale_price || form.internal_price <= 0) {
+        return 0;
+    }
+    const profit = ((form.sale_price - form.internal_price) / form.internal_price) * 100;
+
+    form.profit_percentage = profit;
+
+    return profit.toFixed(2);
+});
 
 const errors = computed(() => page.props.value?.errors ?? {});
 const showErrors = ref(false);

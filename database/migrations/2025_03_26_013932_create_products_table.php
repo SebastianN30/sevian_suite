@@ -18,7 +18,7 @@ return new class extends Migration
             $table->integer('stock')->nullable();
             $table->text('note')->nullable();
             $table->integer('internal_price')->nullable();
-            $table->integer('profit_percentage')->nullable();
+            $table->decimal('profit_percentage')->nullable();
             $table->integer('sale_price')->nullable();
             $table->string('status')->nullable();
             $table->timestamps();
