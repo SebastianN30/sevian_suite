@@ -111,7 +111,8 @@ class ProductsController extends Controller
                 'id' => 'required|exists:products,id',
                 'name' => 'required|string|max:200',
                 'internal_price' => 'required|integer',
-                'profit_percentage' => 'required|integer',
+                'profit_percentage' => 'required',
+                'sale_price' => 'required|integer',
                 'stock' => 'required|integer',
             ];
             $validate = $request->validate($rules);
@@ -121,7 +122,8 @@ class ProductsController extends Controller
             $product->internal_price = $validate['internal_price'];
             $product->profit_percentage = $validate['profit_percentage'];
             $product->stock = $validate['stock'];
-            $product->sale_price = ceil((($validate['internal_price'] * $product->profit_percentage) / 100) + $validate['internal_price']);
+            $product->sale_price = $validate['sale_price'];
+            /* $product->sale_price = ceil((($validate['internal_price'] * $product->profit_percentage) / 100) + $validate['internal_price']); */
 
             if ($product->stock > 0) {
                 $product->status = Product::STATUS_ACTIVE;

@@ -62,10 +62,19 @@
                                 name="name" class="mt-1 p-2 border rounded-md w-full" placeholder="Precio base" required>
                         </div>
                         <div class="mb-4">
-                            <label for="name" class="block text-sm font-medium text-white ">Porcentaje de ganancia</label>
+                            <label for="name" class="block text-sm font-medium text-white ">Precio de venta</label>
                             <input type="number" id="name"
-                                v-model="form.profit_percentage"
-                                name="name" class="mt-1 p-2 border rounded-md w-full" placeholder="Porcentaje de ganancia" required>
+                                v-model="form.sale_price" 
+                                name="name" class="mt-1 p-2 border rounded-md w-full" placeholder="Precio base" required>
+                        </div>
+                        <div class="p-3 bg-blue-50 dark:bg-gray-700 rounded-lg mb-4" v-if="calculatedPercentage > 0">
+                            <p class="text-sm text-gray-600 dark:text-gray-400">Procentaje de ganancia</p>
+                            <p class="text-lg font-bold" :class="{
+                                'text-green-600': calculatedPercentage > 20,
+                                'text-red-600': calculatedPercentage < 20
+                            }">
+                                {{ calculatedPercentage }}%
+                            </p>
                         </div>
                         <div class="mb-4">
                             <label for="name" class="block text-sm font-medium text-white ">Cantidad</label>
@@ -86,7 +95,7 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, Link, router, useForm } from '@inertiajs/vue3';
-import { ref } from 'vue';
+import { ref, computed, watch } from 'vue';
 
 const imagePreview = ref(null);
 
@@ -101,7 +110,19 @@ const form = useForm({
     name: props.product.name,
     internal_price: props.product.internal_price,
     profit_percentage: props.product.profit_percentage,
-    stock: props.product.stock
+    stock: props.product.stock,
+    sale_price: props.product.sale_price
+});
+
+const calculatedPercentage = computed(() => {
+    if (!form.internal_price || !form.sale_price || form.internal_price <= 0) {
+        form.profit_percentage = 0;
+        return 0;
+    }
+
+    const profit = ((form.sale_price - form.internal_price) / form.internal_price) * 100;
+    form.profit_percentage = Number(profit.toFixed(2));
+    return form.profit_percentage;
 });
 
 const submit = () => {
@@ -119,11 +140,7 @@ const submit = () => {
 const handleImageUpload = (event) => {
     const file = event.target.files[0];
     if (file) {
-        // Crear URL temporal para la vista previa
         imagePreview.value = URL.createObjectURL(file);
-        
-        // Aquí puedes manejar la subida del archivo
-        // Por ejemplo, agregarlo a un FormData para enviarlo al servidor
     }
 };
 
