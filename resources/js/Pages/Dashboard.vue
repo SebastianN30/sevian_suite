@@ -1,37 +1,37 @@
 <template>
     <Head title="Dashboard" />
     <AuthenticatedLayout>
-        <template #header>
-            <h2 class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">
-                Dashboard
-            </h2>
-        </template>
-        <div class="py-12">
-            <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
-                <div class="overflow-hidden bg-white shadow-sm sm:rounded-lg dark:bg-gray-900">
-                    <div class="flex justify-center">
-                        <div class="data-tabs">
-                            <div class="data-tab">
-                                <div class="number">{{ counts.complete }}</div>
-                                <p class="title">Completadas</p>
-                            </div>
-                            <div class="data-tab">
-                                <div class="number">{{ counts.pending }}</div>
-                                <p class="title">Pendiente</p>
-                            </div>
-                            <div class="data-tab">
-                                <div class="number">{{ counts.create }}</div>
-                                <p class="title">Creada</p>
-                            </div>
-                            <div class="data-tab">
-                                <div class="number">{{ counts.cancel }}</div>
-                                <p class="title">Cancelada</p>
-                            </div>
+    <div class="py-6">
+        <div class="max-w-7xl mx-auto sm:px-8 space-y-6 border border-gray-300 dark:border-gray-700 rounded-2xl shadow-lg bg-white dark:bg-gray-800">
+            <div class="flex justify-center p-6">
+                <h2 class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">
+                    Ordenes
+                </h2>
+            </div>
+            <div class="py-4">
+                <div class="flex justify-center">
+                    <div class="data-tabs">
+                        <div class="data-tab">
+                            <div class="number">{{ counts.complete }}</div>
+                            <p class="title">Completadas</p>
+                        </div>
+                        <div class="data-tab">
+                            <div class="number">{{ counts.pending }}</div>
+                            <p class="title">Pendientes</p>
+                        </div>
+                        <div class="data-tab">
+                            <div class="number">{{ counts.create }}</div>
+                            <p class="title">Creada</p>
+                        </div>
+                        <div class="data-tab">
+                            <div class="number">{{ counts.cancel }}</div>
+                            <p class="title">Cancelada</p>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
     </AuthenticatedLayout>
 </template>
 
@@ -42,6 +42,7 @@ import { Head } from '@inertiajs/vue3';
 const props = defineProps({
     counts: Object
 });
+
 </script>
 
 <style scoped>
