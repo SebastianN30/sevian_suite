@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Order;
 use Inertia\Inertia;
+use App\Models\Order;
 use App\Models\Product;
 use Illuminate\Http\Request;
 
