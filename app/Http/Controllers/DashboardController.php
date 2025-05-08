@@ -12,16 +12,18 @@ class DashboardController extends Controller
 {
     public function index(Request $request){
 
-        $queryOrders = $this->getCounts();
+        $queryOrders = $this->getOrdersCounts();
+        $topsProducts = $this->getTopsProducts();
 
         return Inertia::render('Dashboard', [
             'canLogin' => Route::has('login'),
             'canRegister' => Route::has('register'),
-            'counts' => $queryOrders
+            'counts' => $queryOrders,
+            'topsProducts' => $topsProducts
         ]);
     }
 
-    private function getCounts(){
+    private function getOrdersCounts(){
 
         $completeOrders = Order::where('status', 'completada')
         ->count();
@@ -42,5 +44,19 @@ class DashboardController extends Controller
             'cancel' => $canceledOrder,
         ];
         return $counts;
+    }
+
+    private function getTopsProducts(){
+
+        $query = Product::select('products.id', 'products.name')
+            ->join('order_product', 'products.id', '=', 'order_product.product_id')
+            ->join('orders', 'orders.id', '=', 'order_product.order_id')
+            ->where('orders.status', 'completada')
+            ->groupBy('products.id', 'products.name')
+            ->selectRaw('SUM(order_product.quantity) as total_vendido')
+            ->orderByDesc('total_vendido')
+            ->limit(5)
+            ->get();
+        return $query;
     }
 }
