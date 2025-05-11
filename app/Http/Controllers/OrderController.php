@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Mail\OrderConfirmed;
+use App\Models\Installment;
 use Inertia\Inertia;
 use App\Models\Order;
 use App\Models\Product;
@@ -49,13 +50,14 @@ class OrderController extends Controller
 
     public function edit(Order $order)
     {
-        $order->load('products', 'client');
+        $order->load('products', 'client', 'installments');
         $products = Product::where('status', Product::STATUS_ACTIVE)->get();
         //dd($order->products);
         return Inertia::render('Orders/Edit', [
             'order' => $order,
             'client' => $order->client,
-            'products' => $products
+            'products' => $products,
+            'has_installments' => $order->installments()->exists()
         ]);
     }
 
@@ -196,6 +198,58 @@ class OrderController extends Controller
         $order->products()->detach();
         $order->delete();
 
-        return redirect()->route('orders.index')->with('success', 'Orden eliminada correctamente.');
+        return redirect()->route('order.index')->with('success', 'Orden eliminada correctamente.');
+    }
+
+    public function storeInstallments(Request $request)
+    {
+        $request->validate([
+            'order_id' => ['required', 'integer', 'exists:orders,id'],
+            'installments.*.amount' => ['required', 'integer', 'min:1'],
+            'installments.*.due_date' => ['required', 'date', 'date_format:Y-m-d']
+        ]);
+
+        $order = Order::find($request->order_id);
+
+        $validate = 0;
+        foreach ($request->installments as $keyCuota => $cuota) {
+            $validate += $cuota['amount'];
+        }
+
+        if ($validate !== $order->total) {
+            return redirect()->route('order.edit', $order->id)->with('error', 'El valor de las cuotas no concuerdan con el total de la orden');
+        }
+
+        foreach ($request->installments as $keyCuota => $cuota) {
+            Installment::create([
+                'order_id' => $order->id,
+                'amount' => $cuota['amount'],
+                'due_date' => $cuota['due_date'],
+                'status' => Installment::STATUS_PENDING
+            ]);
+        }
+
+        return redirect()->route('order.edit', $order->id)->with('success', 'Cuotas creadas exitosamente.');
+    }
+
+    public function updateInstallments(Request $request)
+    {
+        $request->validate([
+            'amount' => ['required', 'integer', 'min:1'],
+            'due_date' => ['required', 'date', 'date_format:Y-m-d H:i:s'],
+            'status' => ['required', 'in:' . implode(',', [Installment::STATUS_PAYED, Installment::STATUS_PENDING])],
+        ]);
+
+        $installment = Installment::find($request->id);
+
+        $order = Order::find($installment->order_id);
+
+        $installment->update([
+            'amount' => $request->amount,
+            'due_date' => $request->due_date,
+            'status' => $request->status,
+        ]);
+
+        return redirect()->route('order.edit', $order->id)->with('success', 'Cuotas actualizadas exitosamente.');
     }
 }

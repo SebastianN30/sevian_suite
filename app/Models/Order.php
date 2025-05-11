@@ -9,10 +9,10 @@ class Order extends Model
 {
     use HasFactory;
 
-    const STATUS_COMPLETED = 'completada';
-    const STATUS_PENDING = 'pendiente';
     const STATUS_CREATED = 'creada';
-    const STATUS_CANCELLED = 'cancelada';
+    const STATUS_PENDING = 'pendiente';
+    const STATUS_PARTIAL = 'pago_parcial';
+    const STATUS_COMPLETED = 'completada';
 
     protected $fillable = [
         'client_id',
@@ -29,5 +29,17 @@ class Order extends Model
     public function products()
     {
         return $this->belongsToMany(Product::class, 'order_product')->withPivot('quantity', 'price', 'subtotal', 'internal_price', 'internal_subtotal', 'change')->withTimestamps();
+    }
+
+    public function installments()
+    {
+        return $this->hasMany(Installment::class);
+    }
+
+    public function getRemainingBalanceAttribute()
+    {
+        return $this->installments->sum(function ($i) {
+            return $i->amount - $i->paid_amount;
+        });
     }
 }

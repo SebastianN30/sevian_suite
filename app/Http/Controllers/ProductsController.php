@@ -138,6 +138,11 @@ class ProductsController extends Controller
                 if ($oldPrice != $newPrice) {
                     $change = $newPrice - $oldPrice;
 
+                    $order->internal_total -= $order->pivot->internal_subtotal;
+                    $order->total -= $order->pivot->subtotal;
+
+                    $order->save();
+
                     $order->pivot->update([
                         'price' => $newPrice,
                         'subtotal' => $order->pivot->quantity * $newPrice,
@@ -146,10 +151,7 @@ class ProductsController extends Controller
                         'change' => $change,
                     ]);
 
-                    $order->internal_total -= $order->pivot->internal_subtotal;
                     $order->internal_total += $order->pivot->quantity * $product->internal_price;
-
-                    $order->total -= $order->pivot->subtotal;
                     $order->total += $order->pivot->quantity * $newPrice;
 
                     $order->save();
