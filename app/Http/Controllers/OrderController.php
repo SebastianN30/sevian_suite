@@ -16,8 +16,6 @@ class OrderController extends Controller
     {
         $search = $request->input('search');
 
-        $search = $request->input('search');
-
         $orders = Order::query()
             ->with('products', 'client')
             ->when($search, function ($query) use ($search) {
