@@ -6,12 +6,20 @@
         <template #header>
             <h2 class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-100">Nuevo Pedido</h2>
         </template>
-        {{ flashSuccess }}
 
         <div v-if="flashSuccess"
             class="mb-4 p-4 border rounded-lg text-green-700 bg-green-100 border-green-400 dark:bg-green-900 dark:border-green-700 dark:text-green-200 transition-colors flex justify-between items-center">
             <span>{{ flashSuccess }}</span>
             <button @click="clearErrors"
+                class="ml-2 text-2xl font-bold rounded-full p-1 hover:bg-red-200 dark:hover:bg-red-700 transition text-red-600 dark:text-red-400">
+                &times;
+            </button>
+        </div>
+
+        <div v-if="flashError"
+            class="mb-4 p-4 border rounded-lg text-red-700 bg-red-100 border-red-400 dark:bg-red-900 dark:border-red-700 dark:text-red-300 transition-colors flex justify-between items-center">
+            <span>{{ flashError }}</span>
+            <button @click="clearFlashError"
                 class="ml-2 text-2xl font-bold rounded-full p-1 hover:bg-red-200 dark:hover:bg-red-700 transition text-red-600 dark:text-red-400">
                 &times;
             </button>
@@ -42,26 +50,140 @@
                     <div class="mb-6 p-4 rounded-lg text-center font-bold text-xl" :class="{
                         'bg-green-200 text-green-800 dark:bg-green-700 dark:text-green-200': order.status === 'completada',
                         'bg-yellow-200 text-yellow-800 dark:bg-yellow-700 dark:text-yellow-200': order.status === 'creada',
-                        'bg-red-200 text-red-800 dark:bg-red-700 dark:text-red-200': order.status === 'pendiente'
+                        'bg-red-200 text-red-800 dark:bg-red-700 dark:text-red-200': order.status === 'pendiente',
+                        'bg-orange-200 text-orange-800 dark:bg-orange-700 dark:text-orange-200': order.status === 'pago_parcial'
                     }">
-                        ESTADO DE LA ORDEN: {{ order.status.toUpperCase() }}
+                        ESTADO DE LA ORDEN: {{ order.status == 'pago_parcial' ? 'PAGANDO' : order.status.toUpperCase()
+                        }}
                     </div>
 
-                    <div class="mt-6 text-center" v-if="order.status === 'creada' || order.status === 'pendiente'">
-                        <button @click="changeStatus('pendiente')" v-if="order.status === 'creada'"
+                    <div class="mt-6 text-center" v-if="['creada', 'pendiente', 'pago_parcial'].includes(order.status)">
+                        <button v-if="order.status === 'creada'" @click="changeStatus('pendiente')"
                             class="bg-yellow-500 hover:bg-yellow-400 text-white py-2 px-4 rounded-lg mr-4 transition">
                             Pasar a Pendiente
                         </button>
-                        <button @click="deleteOrder" v-if="order.status === 'creada' || order.status === 'pendiente'"
+
+                        <button @click="deleteOrder"
                             class="bg-red-500 hover:bg-red-400 text-white py-2 px-4 rounded-lg transition">
                             Eliminar Orden
                         </button>
+
+                        <button v-if="order.status === 'pendiente'" @click="changeStatus('pago_parcial')"
+                            class="bg-orange-500 hover:bg-orange-400 text-white py-2 px-4 rounded-lg ml-4 transition">
+                            Pagos a Cuotas
+                        </button>
+
+                        <button v-if="order.status === 'pendiente' || order.status === 'pago_parcial'"
+                            @click="changeStatus('completada')"
+                            class="bg-green-500 hover:bg-green-400 text-white py-2 px-4 rounded-lg ml-4 transition">
+                            Pasar a Completada
+                        </button>
                     </div>
+
+
                     <div class="mb-6">
                         <h3 class="text-lg font-bold text-gray-900 dark:text-white">Cliente: {{ client.name }} {{
                             client.lastname }}</h3>
                         <p class="text-gray-600 dark:text-gray-400">{{ client.email }} - {{ client.phone_number }}</p>
                     </div>
+
+                    <!-- FORMULARIO para definir cuotas -->
+                    <div v-if="!has_installments && order.status === 'pago_parcial'" class="mt-6">
+                        <h4 class="text-lg font-bold text-gray-800 dark:text-gray-100 mb-2">Definir Cuotas</h4>
+
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Cantidad de
+                                cuotas:</label>
+                            <input type="number" min="1" v-model.number="installmentsCount"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-800 dark:text-white">
+                        </div>
+
+                        <div v-for="(installment, index) in installments" :key="index"
+                            class="mb-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Monto de la
+                                    cuota {{
+                                        index + 1 }}:</label>
+                                <input type="number" min="0" v-model.number="installments[index].amount"
+                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-800 dark:text-white">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Fecha de
+                                    vencimiento:</label>
+                                <input type="date" v-model="installments[index].due_date"
+                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-800 dark:text-white">
+                            </div>
+                        </div>
+
+                        <button @click="submitInstallments"
+                            class="bg-blue-600 hover:bg-blue-500 text-white py-2 px-4 rounded-lg transition mt-2">
+                            Guardar Cuotas
+                        </button>
+                    </div>
+
+                    <div class="overflow-x-auto rounded-lg mt-6"
+                        v-if="has_installments && (order.status == 'pago_parcial' || order.status == 'completada')">
+                        <h4 class="text-lg font-bold text-gray-800 dark:text-gray-100 mb-2">Cuotas</h4>
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-gray-100 dark:bg-[#334155] text-gray-700 dark:text-gray-300">
+                                    <th class="px-4 py-3">#</th>
+                                    <th class="px-4 py-3">Monto</th>
+                                    <th class="px-4 py-3">Vencimiento</th>
+                                    <th class="px-4 py-3">Estado</th>
+                                    <th class="px-4 py-3" v-if="order.status !== 'completada'">Opciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="(installment, i) in order.installments" :key="i"
+                                    class="odd:bg-white even:bg-gray-50 dark:odd:bg-[#1e293b] dark:even:bg-[#263140] transition">
+                                    <td class="px-4 py-3 text-gray-900 dark:text-gray-100">{{ i + 1 }}</td>
+
+                                    <td class="px-4 py-3 text-gray-900 dark:text-gray-100">
+                                        <input v-if="installment.status !== 'pagada'" type="number"
+                                            v-model="installment.amount"
+                                            class="w-24 px-2 py-1 rounded border text-sm dark:bg-gray-700 dark:text-white">
+                                        <span v-else>{{ formatCurrency(installment.amount) }}</span>
+                                    </td>
+
+                                    <td class="px-4 py-3 text-gray-900 dark:text-gray-100">
+                                        <input v-if="installment.status !== 'pagada'" type="date"
+                                            :value="formatDate(installment.due_date)"
+                                            @input="updateDueDate(i, $event.target.value)"
+                                            class="w-36 px-2 py-1 rounded border text-sm dark:bg-gray-700 dark:text-white">
+                                        <span v-else>{{ formatDate(installment.due_date) }}</span>
+                                    </td>
+
+                                    <td class="px-4 py-3 text-gray-900 dark:text-gray-100">
+                                        <template v-if="installment.status === 'pendiente'">
+                                            <select v-model="installment.status"
+                                                class="px-2 py-1 rounded border text-sm dark:bg-gray-700 dark:text-white">
+                                                <option value="pendiente">Pendiente</option>
+                                                <option value="pagada">Pagado</option>
+                                            </select>
+                                        </template>
+                                        <span v-else :class="{
+                                            'text-green-500': installment.status === 'pagada',
+                                            'text-yellow-500': installment.status === 'pendiente',
+                                            'text-red-500': installment.status === 'vencida'
+                                        }">
+                                            {{ installment.status === 'pagada' ? 'Pagada' : (installment.status ===
+                                                'pendiente' ?
+                                                'Pendiente' : 'Vencida') }}
+                                        </span>
+                                    </td>
+
+                                    <td class="px-4 py-3 text-gray-900 dark:text-gray-100" v-if="order.status !== 'completada'">
+                                        <button @click="saveChanges(i)" v-if="order.status !== 'completada'"
+                                            class="bg-blue-500 hover:bg-blue-600 text-white text-sm px-2 py-1 rounded">
+                                            Guardar
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
 
                     <!-- Tabla de productos seleccionados -->
                     <div class="overflow-x-auto rounded-lg mt-6">
@@ -182,11 +304,15 @@ import { Head, usePage, router } from '@inertiajs/vue3';
 import { ref, computed, watch, onMounted } from 'vue';
 import Swal from 'sweetalert2';
 
+const installmentsCount = ref(0)
+const installments = ref([])
+
 const page = usePage();
 const client = page.props.client;
 const products = page.props.products;
 const order = page.props.order;
 const originalOrder = JSON.parse(JSON.stringify(order));
+const has_installments = page.props.has_installments;
 
 const selectedProductId = ref('');
 const selectedProducts = ref(order.products);
@@ -195,6 +321,7 @@ const total = ref(order.total);
 const errors = computed(() => page.props.value?.errors ?? {});
 const showErrors = ref(false);
 const flashSuccess = ref(page.props.flash?.success || null);
+const flashError = ref(page.props.flash?.error || null);
 
 const searchQuery = ref('');
 
@@ -244,9 +371,53 @@ watch(() => page.props.flash?.success, (newFlash) => {
     }
 });
 
+watch(installmentsCount, (newVal) => {
+    installments.value = Array.from({ length: newVal }, () => ({
+        amount: 0,
+        due_date: ''
+    }))
+})
+
+function isValid() {
+    return installments.value.every(inst => inst.amount > 0 && inst.due_date)
+}
+
+function submitInstallments() {
+    if (!isValid()) {
+        showErrors.value = true
+        return
+    }
+
+    router.post(route('orders.installments.store'), {
+        order_id: order.id,
+        installments: installments.value
+    }, {
+        onError: () => {
+            showErrors.value = true;
+        },
+        onSuccess: () => {
+            const errorMessage = page.props.flash?.error;
+            if (errorMessage) {
+                localStorage.setItem('flashError', errorMessage);
+            }
+
+            const successMessage = page.props.flash?.success;
+            if (successMessage) {
+                localStorage.setItem('flashSuccess', successMessage);
+            }
+            router.visit(route('order.edit', order.id))
+        }
+    })
+}
+
 function clearErrors() {
     showErrors.value = false;
     flashSuccess.value = null;
+}
+
+
+function clearFlashError() {
+    flashError.value = null;
 }
 
 function removeProduct(index) {
@@ -257,7 +428,6 @@ function removeProduct(index) {
 
 function calculateTotal() {
     total.value = selectedProducts.value.reduce((sum, product) => {
-        console.log(sum, product);
         try {
             return sum + (product.sale_price * product.pivot.quantity);
         } catch (error) {
@@ -276,7 +446,12 @@ function submitOrder() {
             showErrors.value = true;
         },
         onSuccess: () => {
-            router.reload();
+            const successMessage = page.props.flash?.success;
+            if (successMessage) {
+                localStorage.setItem('flashSuccess', successMessage);
+            }
+
+            router.visit(route('order.edit', order.id));
         }
     });
 }
@@ -304,6 +479,19 @@ function changeStatus(newStatus) {
     }, {
         onError: () => {
             showErrors.value = true;
+        },
+        onSuccess: () => {
+            const errorMessage = page.props.flash?.error;
+            if (errorMessage) {
+                localStorage.setItem('flashError', errorMessage);
+            }
+
+            const successMessage = page.props.flash?.success;
+            if (successMessage) {
+                localStorage.setItem('flashSuccess', successMessage);
+            }
+
+            router.visit(route('order.edit', order.id));
         }
     });
 }
@@ -315,4 +503,62 @@ function deleteOrder() {
         }
     });
 }
+
+function formatDate(date) {
+    const d = new Date(date);
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+
+function updateDueDate(index, newDate) {
+    const original = new Date(this.order.installments[index].due_date);
+    const [year, month, day] = newDate.split('-');
+
+    original.setFullYear(+year, +month - 1, +day);
+    this.order.installments[index].due_date = original.toISOString().slice(0, 19).replace('T', ' ');
+}
+
+function saveChanges(index) {
+    const installment = this.order.installments[index];
+    router.post(route('orders.installments.update'), installment, {
+        onError: () => {
+            showErrors.value = true;
+        },
+        onSuccess: () => {
+            const errorMessage = page.props.flash?.error;
+            if (errorMessage) {
+                localStorage.setItem('flashError', errorMessage);
+            }
+
+            const successMessage = page.props.flash?.success;
+            if (successMessage) {
+                localStorage.setItem('flashSuccess', successMessage);
+            }
+            router.visit(route('order.edit', order.id))
+        }
+    })
+    console.log('Guardando cambios en la cuota:', installment);
+}
+
+function markAsPaid(index) {
+    this.order.installments[index].status = 'pagada';
+    // Aquí podrías hacer una llamada a la API para guardar el cambio
+}
+
+onMounted(() => {
+    const storedFlash = localStorage.getItem('flashSuccess');
+    if (storedFlash) {
+        flashSuccess.value = storedFlash;
+        localStorage.removeItem('flashSuccess');
+    }
+
+    const storedFlashError = localStorage.getItem('flashError');
+    if (storedFlashError) {
+        flashError.value = storedFlashError;
+        localStorage.removeItem('flashError');
+    }
+
+});
 </script>

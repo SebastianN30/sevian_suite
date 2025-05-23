@@ -96,9 +96,10 @@
                                 <td class="px-6 py-4 text-gray-800 dark:text-gray-300"><span :class="{
                                     'bg-yellow-200 text-yellow-800 dark:bg-yellow-700 dark:text-yellow-200': order.status === 'creada',
                                     'bg-red-200 text-red-800 dark:bg-red-700 dark:text-red-200': order.status === 'pendiente',
-                                    'bg-green-200 text-green-800 dark:bg-green-700 dark:text-green-200': order.status === 'completada'
+                                    'bg-green-200 text-green-800 dark:bg-green-700 dark:text-green-200': order.status === 'completada',
+                                    'bg-blue-200 text-blue-800 dark:bg-blue-700 dark:text-blue-200': order.status === 'pago_parcial'
                                 }" class="px-4 py-2 rounded-full text-center font-semibold">
-                                        {{ order.status }}
+                                        {{ order.status == 'pago_parcial' ? 'pagando' : order.status  }}
                                     </span></td>
                                 <td class="px-6 py-4">
                                     <div class="flex space-x-2">
