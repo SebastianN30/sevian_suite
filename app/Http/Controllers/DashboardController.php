@@ -11,15 +11,18 @@ use Illuminate\Support\Facades\Route;
 class DashboardController extends Controller
 {
     public function index(Request $request){
-
         $queryOrders = $this->getOrdersCounts();
         $topsProducts = $this->getTopsProducts();
+        $year = $request->input('year', date('Y'));
+        $monthlySales = $this->getMonthlySales($year);
 
         return Inertia::render('Dashboard', [
             'canLogin' => Route::has('login'),
             'canRegister' => Route::has('register'),
             'counts' => $queryOrders,
-            'topsProducts' => $topsProducts
+            'topsProducts' => $topsProducts,
+            'monthlySales' => $monthlySales,
+            'selectedYear' => $year
         ]);
     }
 
@@ -58,5 +61,32 @@ class DashboardController extends Controller
             ->limit(5)
             ->get();
         return $query;
+    }
+
+    private function getMonthlySales($year)
+    {
+        $sales = Order::where('status', 'completada')
+            ->whereYear('created_at', $year)
+            ->selectRaw('MONTH(created_at) as month, SUM(total) as total_sales')
+            ->groupBy('month')
+            ->orderBy('month')
+            ->get();
+
+        // Formatear los datos para el gráfico
+        $months = [];
+        $totals = [];
+
+        /* $mes = date('F', mktime(0, 0, 0, 1, 1)); */
+        
+        for ($i = 1; $i <= 12; $i++) {
+            $monthData = $sales->firstWhere('month', $i);
+            $months[] = date('F', mktime(0, 0, 0, $i, 1));
+            $totals[] = $monthData ? $monthData->total_sales : 0;
+        }
+
+        return [
+            'months' => $months,
+            'totals' => $totals
+        ];
     }
 }

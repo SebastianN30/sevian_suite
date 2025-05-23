@@ -57,7 +57,7 @@
                             </tr>
                             <tr class="border-b border-gray-200 dark:border-gray-700" v-for="product in products.data" :key="product.id">
                                 <td class="px-4 py-2 whitespace-no-wrap text-gray-700 dark:text-gray-300 border-x border-gray-200 dark:border-gray-700">
-                                    <img :src="product.image" 
+                                    <img :src="imageProduct + product.image" 
                                     :alt="product.name"
                                     class="w-20 h-20 object-cover rounded">
                                 </td>
@@ -122,6 +122,9 @@ const props = defineProps({
     products: Object,
     filters: Object
 });
+
+console.log(props.products, "Hola");
+const imageProduct = "/storage/";
 
 const errors = computed(() => page.props.value?.errors ?? {});
 const showErrors = ref(false);

@@ -25,7 +25,7 @@
         <div class="py-12">
             <div class="max-w-2xl mx-auto sm:px-6 lg:px-8 space-y-6">
                 <div class="p-4 sm:p-8 dark:bg-gray-800 border border-gray-200 shadow sm:rounded-lg">
-                    <form @submit="submit">
+                    <form @submit="submit" enctype="multipart/form-data">
                         <div class="mb-4">
                             <label for="image" class="block text-sm font-medium text-white mb-2">Imagen del producto</label>
                             <div class="flex items-center justify-center w-full">
@@ -41,9 +41,10 @@
                                     </div>
                                     <input 
                                         id="image-upload" 
-                                        type="file" 
-                                        accept="image/*"
+                                        type="file"
+                                        accept="jpeg,png,jpg"
                                         class="hidden"
+                                        @input="form.image = $event.target.files[0]"
                                         @change="handleImageUpload"
                                     />
                                 </label>
@@ -109,7 +110,8 @@ const form = useForm({
     internal_price: '',
     profit_percentage: 0,
     stock: '',
-    sale_price: ''
+    sale_price: '',
+    image: null
 });
 
 const imagePreview = ref(null);
@@ -152,10 +154,22 @@ function back(){
 
 function submit(e){
     e.preventDefault();
+    
+    const formData = new FormData();
+    formData.append('name', form.name);
+    formData.append('internal_price', form.internal_price);
+    formData.append('profit_percentage', form.profit_percentage);
+    formData.append('stock', form.stock);
+    formData.append('sale_price', form.sale_price);
+    if (form.image) {
+        formData.append('image', form.image);
+    }
+
     form.post(route('product.store'), {
         onError: () => {
             showErrors.value = true;
-        }
-    })
+        },
+        forceFormData: true
+    });
 }
 </script>

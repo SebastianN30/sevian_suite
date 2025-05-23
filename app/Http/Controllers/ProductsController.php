@@ -6,6 +6,7 @@ use Inertia\Inertia;
 use App\Models\Order;
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class ProductsController extends Controller
 {
@@ -57,19 +58,31 @@ class ProductsController extends Controller
                 'profit_percentage' => 'required',
                 'stock' => 'required|integer',
                 'sale_price' => 'required|integer',
+                'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
             ]);
 
             /* $profit = ($validate['internal_price'] * $validate['profit_percentage']) / 100;
             $salePrice = $validate['internal_price'] + $profit; */
             $percentage = number_format($validate['profit_percentage'], 2, '.', '');
-            $product = Product::create([
+            
+            $data = [
                 'name' => $validate['name'],
                 'internal_price' => $validate['internal_price'],
                 'profit_percentage' => $percentage,
                 'stock' => $validate['stock'],
                 'sale_price' => $validate['sale_price'],
                 'status' => 1
-            ]);
+            ];
+
+            if ($request->hasFile('image')) {
+                $image = $request->file('image');
+                $imageName = time() . '.' . $image->getClientOriginalExtension();
+                $path = $image->storeAs('products', $imageName, 'public');
+                /* dd($image, Storage::disk('public')->path($path)); */
+                $data['image'] = 'products/' . $imageName;
+            }
+
+            $product = Product::create($data);
 
             return redirect()->route('product.index')->with('success', 'Producto creado correctamente');
         } catch (\Illuminate\Validation\ValidationException $e) {
@@ -114,6 +127,7 @@ class ProductsController extends Controller
                 'profit_percentage' => 'required',
                 'sale_price' => 'required|integer',
                 'stock' => 'required|integer',
+                'image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048'
             ];
             $validate = $request->validate($rules);
             $product = Product::findOrFail($validate['id']);
@@ -123,7 +137,18 @@ class ProductsController extends Controller
             $product->profit_percentage = $validate['profit_percentage'];
             $product->stock = $validate['stock'];
             $product->sale_price = $validate['sale_price'];
-            /* $product->sale_price = ceil((($validate['internal_price'] * $product->profit_percentage) / 100) + $validate['internal_price']); */
+
+            if ($request->hasFile('image')) {
+                // Eliminar la imagen anterior si existe
+                if ($product->image) {
+                    Storage::delete('public/' . $product->image);
+                }
+                
+                $image = $request->file('image');
+                $imageName = time() . '.' . $image->getClientOriginalExtension();
+                $image->storeAs('public/products', $imageName);
+                $product->image = 'products/' . $imageName;
+            }
 
             if ($product->stock > 0) {
                 $product->status = Product::STATUS_ACTIVE;

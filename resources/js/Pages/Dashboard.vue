@@ -37,7 +37,22 @@
                         <Pie :data="chartData" :options="chartOptions" />
                     </div>
                     <div class="w-full md:w-1/2 max-w-lg mx-auto bg-white dark:bg-gray-900 rounded-xl p-4 shadow flex items-center justify-center">
-                        <span class="text-sm text-gray-500 dark:text-gray-400">Aquí irá otro gráfico</span>
+                        <div class="w-full">
+                            <div class="mb-4">
+                                <label for="year" class="block text-sm font-medium text-gray-200 mb-2">Seleccionar Año:</label>
+                                <select 
+                                    id="year" 
+                                    v-model="selectedYear"
+                                    @change="updateChart"
+                                    class="bg-gray-800 border border-gray-700 text-gray-200 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+                                >
+                                    <option v-for="year in availableYears" :key="year" :value="year">
+                                        {{ year }}
+                                    </option>
+                                </select>
+                            </div>
+                            <Line :data="lineChartData" :options="lineChartOptions" />
+                        </div>
                     </div>
                 </div>
             </div>
@@ -49,20 +64,28 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head } from '@inertiajs/vue3';
-import { Pie } from 'vue-chartjs';
+import { Pie, Line } from 'vue-chartjs';
+import { ref, computed } from 'vue';
+import { router } from '@inertiajs/vue3';
 import {
   Chart as ChartJS,
   Title,
   Tooltip,
   Legend,
   ArcElement,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement
 } from 'chart.js'
 
-ChartJS.register(Title, Tooltip, Legend, ArcElement)
+ChartJS.register(Title, Tooltip, Legend, ArcElement, CategoryScale, LinearScale, PointElement, LineElement)
 
 const props = defineProps({
     counts: Object,
-    topsProducts: Object
+    topsProducts: Object,
+    monthlySales: Object,
+    selectedYear: Number
 });
 
 const chartData = {
@@ -90,6 +113,71 @@ const chartOptions = {
   }
 }
 
+// Configuración del gráfico de líneas
+const selectedYear = ref(props.selectedYear || new Date().getFullYear());
+
+const availableYears = computed(() => {
+    const currentYear = new Date().getFullYear();
+    return Array.from({length: 5}, (_, i) => currentYear - i);
+});
+
+const lineChartData = computed(() => ({
+    labels: props.monthlySales?.months || [],
+    datasets: [
+        {
+            label: `Ventas ${selectedYear.value}`,
+            data: props.monthlySales?.totals || [],
+            borderColor: '#36A2EB',
+            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+            tension: 0.4,
+            fill: true
+        }
+    ]
+}));
+
+const lineChartOptions = {
+    responsive: true,
+    plugins: {
+        legend: {
+            position: 'top',
+            labels: {
+                color: '#ffffff'
+            }
+        },
+        title: {
+            display: true,
+            text: 'Ventas Mensuales',
+            color: '#ffffff'
+        }
+    },
+    scales: {
+        y: {
+            beginAtZero: true,
+            grid: {
+                color: 'rgba(255, 255, 255, 0.1)'
+            },
+            ticks: {
+                color: '#ffffff'
+            }
+        },
+        x: {
+            grid: {
+                color: 'rgba(255, 255, 255, 0.1)'
+            },
+            ticks: {
+                color: '#ffffff'
+            }
+        }
+    }
+};
+
+const updateChart = () => {
+    router.get(route('dashboard'), { year: selectedYear.value }, {
+        preserveState: true,
+        preserveScroll: true,
+        only: ['monthlySales', 'selectedYear']
+    });
+};
 </script>
 
 <style scoped>
