@@ -104,6 +104,9 @@ class DatabaseSeeder extends Seeder
             }
         }
 
+        echo "---CREANDO ROLES Y PERMISOS---\n";
+        $this->call(RoleAndPermissionSeeder::class);
+
         echo "---CHAO CON ADIOS---\n";
     }
 }
