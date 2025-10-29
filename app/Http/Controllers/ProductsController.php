@@ -6,6 +6,8 @@ use Inertia\Inertia;
 use App\Models\Order;
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\Products\DataExport;
 use Illuminate\Support\Facades\Storage;
 
 class ProductsController extends Controller
@@ -221,5 +223,30 @@ class ProductsController extends Controller
         } catch (\Exception $e) {
             return back()->with('error', 'Error al actualizar el stock')->withInput();
         }
+    }
+
+    public function exportToExcelProducts(Request $request)
+    {
+        ini_set('memory_limit', '1G');
+        set_time_limit(600);
+
+        $search = $request->input('search');
+  
+        $products = Product::query()
+            ->when($search, function ($query, $search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                        ->orWhere('stock', 'like', "%{$search}%")
+                        ->orWhere('internal_price', 'like', "%{$search}%")
+                        ->orWhere('profit_percentage', 'like', "%{$search}%")
+                        ->orWhere('sale_price', 'like', "%{$search}%")
+                        ->orWhere('status', 'like', "%{$search}%");
+                });
+            })
+            ->with('orders')
+            ->latest()
+            ->get();
+
+        return Excel::download(new DataExport($products), 'products.xlsx');
     }
 }

@@ -42,6 +42,7 @@ Route::middleware('auth')->group(function () {
     Route::get('products/new', [ProductsController::class, 'create'])->name('product.create');
     Route::post('products/store', [ProductsController::class, 'store'])->name('product.store');
     Route::get('products/edit/{id}', [ProductsController::class, 'edit'])->name('product.edit');
+    Route::get('products/export', [ProductsController::class, 'exportToExcelProducts'])->name('product.export');
     Route::post('products/update', [ProductsController::class, 'update'])->name('product.update');
     Route::get('products/delete', [ProductsController::class, 'delete'])->name('product.delete');
     Route::get('products/stock/{id}', [ProductsController::class, 'updateStock'])->name('product.updateStock');

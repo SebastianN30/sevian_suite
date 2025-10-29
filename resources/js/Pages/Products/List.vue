@@ -6,6 +6,9 @@
                 Productos
             </h2>
         </template>
+        <div v-if="isLoading" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <Spinner />
+        </div>
         <div v-if="flashSuccess" class="max-w-7xl mx-auto px-6 sm:px-8 mt-4">
             <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
                 <span class="block sm:inline">{{ flashSuccess }}</span>
@@ -20,10 +23,16 @@
                     <input v-model="search"
                         class="bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-white border border-gray-300 dark:border-gray-600 rounded-lg py-2 px-4 w-1/4 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
                         type="text" placeholder="Buscar productos...">
-                    <Link :href="route('product.create')"
-                        class="mt-4 inline-block bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded transition-colors duration-200">
-                        Crear producto
-                    </Link>
+                    <div class="flex items-center gap-4">
+                        <Link :href="route('product.create')"
+                            class="mt-4 inline-block bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded transition-colors duration-200">
+                            Crear producto
+                        </Link>
+                        <button @click="exportData"
+                            class="mt-4 inline-block bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded transition-colors duration-200">
+                            Reporte
+                        </button>
+                    </div>
                 </div>
                 <div class="bg-white dark:bg-gray-800 shadow sm:rounded-lg p-4">
                     <table class="min-w-full mt-5">
@@ -114,6 +123,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { PackageOpen,SquarePen,Trash  } from 'lucide-vue-next';
 import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import Paginator from '@/Pages/Pagination/Paginator.vue';
+import Spinner from '@/Pages/Spinner.vue';
 import Modal from '@/Pages/Modals/Stock.vue';
 import { ref, watch, computed } from 'vue';
 
@@ -151,5 +161,40 @@ const openModal = (product) => {
 const closeModal = () => {
     isModalOpen.value = false;
     selectedProduct.value =null
+};
+
+const isLoading = ref(false);
+
+const exportData = async (event) => {
+    isLoading.value = true;
+    try {
+        event.preventDefault();
+
+        const response = await axios.get('/products/export', {
+            params: { search: search.value },
+            responseType: 'blob',
+        });
+        
+        // Crear un enlace de descarga para el archivo
+        const downloadUrl = URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement('a');
+        link.href = downloadUrl;
+
+        // Nombre del archivo dinámico
+        const currentDate = new Date();
+        const formattedDate = currentDate.toISOString().replace(/[-:]/g, '_').split('.')[0];
+        link.setAttribute('download', `Reporte_Productos_${formattedDate}.xlsx`);
+
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+
+        // Limpiar el URL creado para liberar memoria
+        URL.revokeObjectURL(downloadUrl);
+    } catch (error) {
+        console.error('Error al realizar la exportación:', error);
+    } finally {
+        isLoading.value = false;
+    }
 };
 </script>
