@@ -12,9 +12,11 @@ use Illuminate\Support\Facades\Mail;
 
 class OrderController extends Controller
 {
+
     public function index(Request $request)
     {
         $search = $request->input('search');
+        $status = $request->input('status'); // 👈 nuevo filtro
 
         $orders = Order::query()
             ->with('products', 'client')
@@ -33,18 +35,22 @@ class OrderController extends Controller
                     }
                 });
             })
+            ->when($status, function ($query) use ($status) { // 👈 filtrar por estado
+                $query->where('status', $status);
+            })
             ->latest()
             ->paginate(10)
             ->withQueryString();
-
 
         return Inertia::render('Orders/List', [
             'orders' => $orders,
             'filters' => [
                 'search' => $search,
+                'status' => $status,
             ],
         ]);
     }
+
 
     public function edit(Order $order)
     {

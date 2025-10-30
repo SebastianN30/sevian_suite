@@ -26,15 +26,15 @@
                     <div class="flex items-center gap-4">
                         <Link :href="route('product.create')"
                             class="mt-4 inline-block bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded transition-colors duration-200">
-                            Crear producto
+                            <FilePlus />
                         </Link>
                         <button @click="exportData"
                             class="mt-4 inline-block bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded transition-colors duration-200">
-                            Reporte
+                            <FileSpreadsheet />
                         </button>
                     </div>
                 </div>
-                <div class="bg-white dark:bg-gray-800 shadow sm:rounded-lg p-4">
+                <div class="bg-white dark:bg-gray-800 shadow sm:rounded-lg">
                     <table class="min-w-full mt-5">
                         <thead>
                             <tr>
@@ -120,7 +120,7 @@
 </template>
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { PackageOpen,SquarePen,Trash  } from 'lucide-vue-next';
+import { PackageOpen, SquarePen, Trash, FileSpreadsheet, FilePlus  } from 'lucide-vue-next';
 import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import Paginator from '@/Pages/Pagination/Paginator.vue';
 import Spinner from '@/Pages/Spinner.vue';

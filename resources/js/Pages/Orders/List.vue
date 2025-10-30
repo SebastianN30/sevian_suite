@@ -46,7 +46,15 @@
                 <div class="p-6 flex justify-between items-center">
                     <input v-model="search"
                         class="bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-white border border-gray-300 dark:border-gray-600 rounded-lg py-2 px-4 w-1/4 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
-                        type="text" placeholder="Buscar Ordenes...">
+                        type="text" placeholder="Buscar coincidencias...">
+
+                    <select v-model="status" class="bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-white border border-gray-300 dark:border-gray-600 rounded-lg py-2 px-4 w-1/4 focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
+                        <option value="">Filtrar por estado</option>
+                        <option value="completada">Completada</option>
+                        <option value="pendiente">Pendiente</option>
+                        <option value="creada">Creada</option>
+                        <option value="pagando">Pagando</option>
+                    </select>
                 </div>
 
                 <div class="p-6">
@@ -59,6 +67,9 @@
                                 <th
                                     class="px-6 py-3 text-left text-sm font-bold text-gray-800 dark:text-gray-200 uppercase tracking-wider">
                                     Cliente</th>
+                                <th
+                                    class="px-6 py-3 text-left text-sm font-bold text-gray-800 dark:text-gray-200 uppercase tracking-wider">
+                                    Telefono</th>
                                 <th
                                     class="px-6 py-3 text-left text-sm font-bold text-gray-800 dark:text-gray-200 uppercase tracking-wider">
                                     Productos</th>
@@ -90,6 +101,7 @@
                                         class="text-blue-500 dark:text-blue-400 hover:text-blue-600 dark:hover:text-blue-500 underline hover:underline-offset-2 transition-colors duration-200">{{
                                             order.client.name + ' ' +
                                             order.client.lastname }}</a></td>
+                                <td class="px-6 py-4 text-gray-800 dark:text-gray-300">{{ order.client.phone_number }}</td>
                                 <td class="px-6 py-4 text-gray-800 dark:text-gray-300">{{ order.products.length }}</td>
                                 <td class="px-6 py-4 text-gray-800 dark:text-gray-300">{{ formatCurrency(order.total) }}
                                 </td>
@@ -131,7 +143,7 @@ import Paginator from '@/Pages/Pagination/Paginator.vue';
 import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import { ref, watch, computed } from 'vue';
 import Swal from 'sweetalert2';
-import { Eye, Trash, FileBadge2 } from 'lucide-vue-next';
+import { Eye, ShoppingBasket } from 'lucide-vue-next';
 
 const page = usePage();
 const props = defineProps({
@@ -141,11 +153,18 @@ const props = defineProps({
 
 const errors = computed(() => page.props.value?.errors ?? {});
 const showErrors = ref(false);
+
 const search = ref(props.filters.search || '');
+const status = ref(props.filters.status || '');
 const flashSuccess = ref(page.props.flash?.success || null);
 
-watch(search, (value) => {
-    router.get(route('order.index'), { search: value }, { preserveState: true, replace: true });
+// 🔍 Watchers para búsqueda y estado
+watch([search, status], ([newSearch, newStatus]) => {
+    router.get(
+        route('order.index'),
+        { search: newSearch, status: newStatus },
+        { preserveState: true, replace: true }
+    );
 });
 
 watch(errors, (newErrors) => {
@@ -161,3 +180,4 @@ function formatCurrency(value) {
     return new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(value);
 }
 </script>
+

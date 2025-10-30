@@ -49,8 +49,8 @@
                         type="text" placeholder="Buscar clientes...">
 
                     <Link :href="route('client.create')"
-                        class="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-lg transition-colors duration-200 shadow-sm">
-                    Crear cliente
+                        class="w-40 bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-lg transition-colors duration-200 shadow-sm flex items-center justify-center">
+                        Crear cliente <UserPlus class="ml-2" />
                     </Link>
                 </div>
 
@@ -124,7 +124,7 @@ import Paginator from '@/Pages/Pagination/Paginator.vue';
 import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import { ref, watch, computed } from 'vue';
 import Swal from 'sweetalert2';
-import { Eye, Trash, FileBadge2 } from 'lucide-vue-next';
+import { Eye, Trash, FileBadge2, UserPlus } from 'lucide-vue-next';
 
 const page = usePage();
 const props = defineProps({

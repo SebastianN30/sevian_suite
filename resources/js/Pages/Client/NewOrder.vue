@@ -4,7 +4,7 @@
 
     <AuthenticatedLayout>
         <template #header>
-            <h2 class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-100">Nuevo Pedido</h2>
+            <h2 class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-100">Nueva orden</h2>
         </template>
 
         <div v-if="flashSuccess"
@@ -90,7 +90,7 @@
                     </div>
 
                     <!-- Resumen -->
-                    <div class="mt-6 p-4 border-t dark:border-gray-700">
+                    <div class="mt-6 p-4 border-t dark:border-gray-700" v-if="filteredProducts.length > 0 && selectedProducts.length > 0">
                         <div class="flex justify-between items-center">
                             <h3 class="text-lg font-bold text-gray-800 dark:text-white">Total:</h3>
                             <span class="text-xl font-bold text-blue-500">{{ formatCurrency(total) }}</span>
